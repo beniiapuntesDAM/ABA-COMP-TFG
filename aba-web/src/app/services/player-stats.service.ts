@@ -21,5 +21,9 @@ export class PlayerStatsService {
   getStatsByUsername(username: string): Observable<PlayerStats> {
     return this.http.get<PlayerStats>(`${this.apiUrl}/username/${username}`);
   }
-}
 
+  // Verificar credenciales 
+  comprobarContra(username: string, password: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/check`, { username, password });
+  }
+}

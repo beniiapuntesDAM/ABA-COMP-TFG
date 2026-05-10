@@ -87,4 +87,26 @@ public class SupabaseClient {
         PlayerStats[] result = response.getBody();
         return result.length > 0 ? result[0] : null;
     }
+
+    /**
+     * Metodo que busca al jugador, y compara el username y contraseña con los datos de la bbdd,
+     * para la acreditacion del login
+     *
+     * @param username nombre de cuenta del usuario
+     * @param password contraseña del usuario
+     * @return
+     */
+    public boolean loginComprobarContrasenia(String username, String password) {
+        HttpEntity<String> entity = new HttpEntity<>(headers());
+        ResponseEntity<PlayerStats[]> response = restTemplate.exchange(
+                url + "?username=eq." + username,
+                HttpMethod.GET,
+                entity,
+                PlayerStats[].class
+        );
+        PlayerStats[] result = response.getBody();
+        if (result == null || result.length == 0) return false;
+        return result[0].getPassword().equals(password);
+    }
+
 }

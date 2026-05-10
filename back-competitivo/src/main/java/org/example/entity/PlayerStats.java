@@ -16,6 +16,9 @@ public class PlayerStats {
     /** Nombre de usuario del jugador. */
     private String username;
 
+    /** Contraseña del jugador. */
+    private String password;
+
     /** Número de kills realizados. */
     private int kills;
 

@@ -1,0 +1,74 @@
+<div class="perfil-page">
+  <ng-container *ngIf="stats">
+
+  <div class="perfil-header">
+    <div class="avatar">{{ stats.username.charAt(0).toUpperCase() }}</div>
+    <div class="perfil-info">
+      <h1>{{ stats.username }}</h1>
+      <p class="since">Desde {{ stats.created_at | date:'MMM yyyy' }}</p>
+    </div>
+    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
+  </div>
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <span class="stat-label">Kills</span>
+      <span class="stat-value">{{ stats.kills }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Deaths</span>
+      <span class="stat-value">{{ stats.deaths }}</span>
+    </div>
+
+    <div class="stat-card highlight">
+      <span class="stat-label">K/D</span>
+      <span class="stat-value">{{ kd }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Wins</span>
+      <span class="stat-value">{{ stats.wins }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Losses</span>
+      <span class="stat-value">{{ stats.losses }}</span>
+    </div>
+
+    <div class="stat-card highlight">
+      <span class="stat-label">Winrate</span>
+      <span class="stat-value">{{ winrate }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Daño hecho</span>
+      <span class="stat-value">{{ stats.damage_done }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Daño recibido</span>
+      <span class="stat-value">{{ stats.damage_taken }}</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Wools colocadas</span>
+      <span class="stat-value">{{ stats.wools_placed }}</span>
+    </div>
+
+    <div class="stat-card highlight">
+      <span class="stat-label">Tiempo jugado</span>
+      <span class="stat-value">{{ formatTime(stats.time_played) }}</span>
+    </div>
+
+  </div>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="footer-actions">
+    <button class="home-btn" routerLink="/">Volver al inicio</button>
+  </div>
+
+  </ng-container>
+</div>

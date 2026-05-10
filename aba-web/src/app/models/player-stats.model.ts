@@ -10,4 +10,5 @@ export interface PlayerStats {
   created_at: string;
   damage_done: number;
   damage_taken: number;
+  password: string;
 }

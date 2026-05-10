@@ -1,0 +1,24 @@
+<div class="login-page">
+  <div class="login-form">
+
+    <h2>Iniciar sesión</h2>
+
+    <input
+      [(ngModel)]="usernameInput"
+      placeholder="Username"
+      type="text"
+    />
+    <input
+      [(ngModel)]="passwordInput"
+      placeholder="Contraseña"
+      type="password"
+    />
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button (click)="login()">Entrar</button>
+
+    <button class="home-btn" routerLink="/">Volver al inicio</button>
+
+  </div>
+</div>

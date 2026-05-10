@@ -2,6 +2,8 @@ package org.example.controlador;
 
 import org.example.entity.PlayerStats;
 import org.example.service.PlayerStatsService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,5 +49,22 @@ public class PlayerStatsController {
     @GetMapping("/username/{username}")
     public PlayerStats getByUsername(@PathVariable String username) {
         return playerStatsService.getByUsername(username);
+    }
+
+    /**
+     * Devuelve true o false dependiendo si la contraseña coincide para ese username pasado tambien
+     * @param jugador
+     * @return
+     */
+    @PostMapping("/check")
+    public ResponseEntity<Boolean> comprobarContra(@RequestBody PlayerStats jugador) {
+        Boolean resultado = playerStatsService.loginComprobarContrasenia(
+                jugador.getUsername(),
+                jugador.getPassword()
+        );
+        if (resultado) {
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 }
