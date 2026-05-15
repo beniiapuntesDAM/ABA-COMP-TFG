@@ -5,19 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90b68277-9b4e-4a67-ad01-45b64035ff11" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/models/player-stats.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/models/player-stats.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/back-competitivo/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/entity/PlayerStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/entity/PlayerStats.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/SupabaseClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/SupabaseClient.java" afterDir="false" />
     </list>

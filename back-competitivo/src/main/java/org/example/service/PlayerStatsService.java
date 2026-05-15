@@ -53,5 +53,7 @@ public class PlayerStatsService {
         return client.getByUsername(username);
     }
 
+    public boolean updateContra(String username, String password) { return client.updateContra(username, password); }
+
     public Boolean loginComprobarContrasenia(String username, String password){ return client.loginComprobarContrasenia(username, password); }
 }

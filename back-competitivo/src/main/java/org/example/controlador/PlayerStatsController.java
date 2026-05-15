@@ -67,4 +67,19 @@ public class PlayerStatsController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
+
+    @PatchMapping("/updateContra")
+    public ResponseEntity<Boolean> updateContra(@RequestBody PlayerStats jugador) {
+        System.out.println("Username recibido: " + jugador.getUsername());  // ← log
+        System.out.println("Password recibida: " + jugador.getPassword());  // ← log
+        boolean resultado = playerStatsService.updateContra(
+                jugador.getUsername(),
+                jugador.getPassword()
+        );
+        System.out.println("Resultado update: " + resultado);  // ← log
+        if (resultado) {
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
+    }
 }

@@ -6,6 +6,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 /**
  * Cliente HTTP para acceder a la tabla {@code player_stats} de Supabase.
@@ -21,7 +23,9 @@ public class SupabaseClient {
     private final String key = "sb_publishable_3hsCpcNVmlgYWXINwHpYkQ_Ti-ZpanW";
 
     /** Cliente HTTP de Spring para realizar las peticiones REST. */
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate(
+            new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault())
+    );
 
     /**
      * Construye las cabeceras HTTP necesarias para autenticarse en Supabase.
@@ -108,5 +112,27 @@ public class SupabaseClient {
         if (result == null || result.length == 0) return false;
         return result[0].getPassword().equals(password);
     }
+
+    /**
+     * Actualiza la contraseña de un jugador identificado por su nombre de usuario.
+     *
+     * @param username nombre de usuario del jugador
+     * @param newPassword nueva contraseña a establecer
+     * @return {@code true} si la actualización fue exitosa, {@code false} en caso contrario
+     */
+    public boolean updateContra(String username, String newPassword) {
+        HttpEntity<String> entity = new HttpEntity<>(
+                "{\"password\": \"" + newPassword + "\"}",
+                headers()
+        );
+        ResponseEntity<String> response = restTemplate.exchange(
+                url + "?username=eq." + username,
+                HttpMethod.PATCH,
+                entity,
+                String.class
+        );
+        return response.getStatusCode().is2xxSuccessful();
+    }
+
 
 }

@@ -1,13 +1,14 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { PlayerStatsService } from '../../services/player-stats.service';
 import { PlayerStats } from '../../models/player-stats.model';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
 })
@@ -15,6 +16,13 @@ export class Perfil implements OnInit {
 
   stats: PlayerStats | null = null;
   error = '';
+
+  // --- Cambio de contraseña ---
+  mostrarModalContra = false;
+  nuevaContra = '';
+  confirmarContra = '';
+  mensajeContra = '';
+  errorContra = '';
 
   constructor(
     private playerStatsService: PlayerStatsService,
@@ -67,6 +75,44 @@ export class Perfil implements OnInit {
     if (!this.stats) return '0%';
     const total = this.stats.wins + this.stats.losses;
     return total === 0 ? '0%' : ((this.stats.wins / total) * 100).toFixed(1) + '%';
+  }
+
+  abrirModalContra(): void {
+    this.mostrarModalContra = true;
+    this.nuevaContra = '';
+    this.confirmarContra = '';
+    this.mensajeContra = '';
+    this.errorContra = '';
+  }
+
+  cerrarModalContra(): void {
+    this.mostrarModalContra = false;
+  }
+
+  cambiarContra(): void {
+    this.mensajeContra = '';
+    this.errorContra = '';
+
+    if (!this.nuevaContra || !this.confirmarContra) {
+      this.errorContra = 'Rellena ambos campos.';
+      return;
+    }
+    if (this.nuevaContra !== this.confirmarContra) {
+      this.errorContra = 'Las contraseñas no coinciden.';
+      return;
+    }
+
+    const username = this.getCookie('username')!;
+    this.playerStatsService.updateContra(username, this.nuevaContra).subscribe({
+      next: () => {
+        this.mensajeContra = '¡Contraseña actualizada correctamente!';
+        this.nuevaContra = '';
+        this.confirmarContra = '';
+      },
+      error: () => {
+        this.errorContra = 'Error al actualizar la contraseña.';
+      }
+    });
   }
 
   private getCookie(name: string): string | null {

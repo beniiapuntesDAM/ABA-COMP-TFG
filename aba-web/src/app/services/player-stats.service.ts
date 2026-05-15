@@ -26,4 +26,9 @@ export class PlayerStatsService {
   comprobarContra(username: string, password: string): Observable<boolean> {
     return this.http.post<boolean>(`${this.apiUrl}/check`, { username, password });
   }
+
+  //Cambiar contraseña una vez logeado
+  updateContra(username: string, password: string): Observable<boolean> {
+  return this.http.patch<boolean>(`${this.apiUrl}/updateContra`, { username, password });
+}
 }
