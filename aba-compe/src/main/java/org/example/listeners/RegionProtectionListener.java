@@ -1,6 +1,7 @@
 package org.example.listeners;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -8,118 +9,160 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.example.Main;
+import org.example.entity.mapa.EnterRuleEntity;
 import org.example.entity.mapa.RegionEntity;
+import org.example.entity.objetivo.WoolEntity;
 import org.example.mapa.GameMap;
+import org.example.partida.Match;
 import org.example.partida.MatchManager;
 
 import java.util.Map;
 
-/**
- * Listener que protege las regiones del mapa durante una partida.
- * Impide romper bloques en regiones never-build y restringe la colocación
- * de bloques fuera de las regiones de construcción permitidas y los límites de altura.
- */
 public class RegionProtectionListener implements Listener {
 
-    /**
-     * Cancela la rotura de bloques en regiones protegidas.
-     *
-     * @param e evento de rotura de bloque
-     */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
-        if (isProtected(e.getPlayer(), e.getBlock().getLocation())) {
-            e.setCancelled(true);
-            e.getPlayer().sendMessage("§cNo puedes modificar bloques aquí.");
-        }
-    }
-
-    /**
-     * Valida la colocación de bloques comprobando en orden:
-     * si el bloque es una lana de objetivo en su monumento (se permite y delega al WoolListener),
-     * los límites de altura máxima y mínima, si el bloque está dentro de alguna región
-     * de construcción permitida y si la posición está en una región never-build.
-     *
-     * @param e evento de colocación de bloque
-     */
-    @EventHandler(priority = EventPriority.LOW)
-    public void onBlockPlace(BlockPlaceEvent e) {
+        Player p = e.getPlayer();
         GameMap map = Main.get().getCurrentMap();
+        if (map != null && !map.isBuildingAllowed()) {
+            e.setCancelled(true);
+            return;
+        }
+        // Proteger salas de lana
+        if (map != null && MatchManager.get().isInGame()) {
+            Match match = MatchManager.get().getPartida();
+            if (match != null) {
+                String teamId = match.getTeamOf(p);
+                for (EnterRuleEntity rule : map.getEnterRules()) {
+                    if (rule.getRegion() == null) continue;
+                    if (!rule.getRegion().contains(
+                            e.getBlock().getX(),
+                            e.getBlock().getY(),
+                            e.getBlock().getZ())) continue;
 
-        if (map != null) {
-            for (org.example.entity.objetivo.WoolEntity wool : map.getWools()) {
-                if (wool.getColor() == e.getBlock().getType()) {
-                    double x = e.getBlock().getX();
-                    double y = e.getBlock().getY();
-                    double z = e.getBlock().getZ();
-                    if (Math.abs(x - wool.getMonX()) < 1 &&
-                            Math.abs(y - wool.getMonY()) < 1 &&
-                            Math.abs(z - wool.getMonZ()) < 1) {
+                    if (teamId == null || !teamId.equalsIgnoreCase(rule.getTeamId())) {
+                        e.setCancelled(true);
+                        p.sendMessage("§c" + rule.getMessage());
                         return;
                     }
                 }
             }
         }
 
-        if (map.getMaxBuildHeight() > 0 && e.getBlock().getY() > map.getMaxBuildHeight()) {
+        if (isProtected(p, e.getBlock().getLocation())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage("§cNo puedes construir más alto de Y " + map.getMaxBuildHeight());
+            p.sendMessage("§cNo puedes modificar bloques aquí.");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        Player p = e.getPlayer();
+        GameMap map = Main.get().getCurrentMap();
+        if (map != null && !map.isBuildingAllowed()) {
+            e.setCancelled(true);
+            return;
+        }
+        if (map == null) return;
+
+        Block block = e.getBlock();
+
+        // BYPASS MONUMENTO — tiene prioridad sobre todo
+        if (isMonumentPlacement(block, map)) {
+            e.setCancelled(false);
             return;
         }
 
-        if (e.getBlock().getY() < map.getMinBuildHeight()) {
+        // Proteger salas de lana
+        if (MatchManager.get().isInGame()) {
+            Match match = MatchManager.get().getPartida();
+            if (match != null) {
+                String teamId = match.getTeamOf(p);
+                for (EnterRuleEntity rule : map.getEnterRules()) {
+                    if (rule.getRegion() == null) continue;
+                    if (!rule.getRegion().contains(
+                            block.getX(),
+                            block.getY(),
+                            block.getZ())) continue;
+
+                    if (teamId == null || !teamId.equalsIgnoreCase(rule.getTeamId())) {
+                        e.setCancelled(true);
+                        p.sendMessage("§c" + rule.getMessage());
+                        return;
+                    }
+                }
+            }
+        }
+
+        // LÍMITE DE ALTURA MÁXIMA
+        if (map.getMaxBuildHeight() > 0 && block.getY() > map.getMaxBuildHeight()) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage("§cNo puedes construir más abajo de Y " + map.getMinBuildHeight());
+            p.sendMessage("§cNo puedes construir más alto de Y " + map.getMaxBuildHeight());
             return;
         }
 
-        if (MatchManager.get().isInGame() && map != null && !map.getBuildRegions().isEmpty()) {
-            double x = e.getBlock().getX();
-            double y = e.getBlock().getY();
-            double z = e.getBlock().getZ();
+        // LÍMITE DE ALTURA MÍNIMA
+        if (block.getY() < map.getMinBuildHeight()) {
+            e.setCancelled(true);
+            p.sendMessage("§cNo puedes construir más abajo de Y " + map.getMinBuildHeight());
+            return;
+        }
 
+        // BUILD REGIONS
+        if (MatchManager.get().isInGame() && !map.getBuildRegions().isEmpty()) {
             boolean dentroDeAlguna = false;
             for (RegionEntity region : map.getBuildRegions()) {
-                if (region.contains(x, y, z)) {
+                if (region.contains(block.getX(), block.getY(), block.getZ())) {
                     dentroDeAlguna = true;
                     break;
                 }
             }
-
             if (!dentroDeAlguna) {
                 e.setCancelled(true);
-                e.getPlayer().sendMessage("§cNo puedes construir fuera de los límites del mapa.");
+                p.sendMessage("§cNo puedes construir fuera de los límites del mapa.");
                 return;
             }
         }
 
-        if (isProtected(e.getPlayer(), e.getBlock().getLocation())) {
+        // NEVER BUILD REGIONS
+        if (isProtected(p, block.getLocation())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage("§cNo puedes modificar bloques aquí.");
+            p.sendMessage("§cNo puedes modificar bloques aquí.");
         }
     }
 
-    /**
-     * Comprueba si una ubicación está dentro de alguna región never-build del mapa.
-     *
-     * @param p   jugador que intenta modificar el bloque
-     * @param loc ubicación del bloque
-     * @return {@code true} si la ubicación está protegida, {@code false} en caso contrario
-     */
+    private boolean isMonumentPlacement(Block block, GameMap map) {
+        int x = block.getX();
+        int y = block.getY();
+        int z = block.getZ();
+
+        for (WoolEntity wool : map.getWools()) {
+            if (wool.getColor() != block.getType()) continue;
+
+            int monX = (int) Math.floor(wool.getMonX());
+            int monY = (int) Math.floor(wool.getMonY());
+            int monZ = (int) Math.floor(wool.getMonZ());
+
+            if (x == monX && y == monY && z == monZ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isProtected(Player p, Location loc) {
         if (!MatchManager.get().isInGame()) return false;
 
         GameMap map = Main.get().getCurrentMap();
         if (map == null) return false;
 
-        Map<String, RegionEntity> regions = map.getRegions();
+        if (isMonumentPlacement(loc.getBlock(), map)) return false;
 
+        Map<String, RegionEntity> regions = map.getRegions();
         for (String regionId : map.getNeverBuildRegions()) {
             RegionEntity region = regions.get(regionId);
             if (region == null) continue;
-            if (region.contains(loc.getX(), loc.getY(), loc.getZ())) {
-                return true;
-            }
+            if (region.contains(loc.getX(), loc.getY(), loc.getZ())) return true;
         }
 
         return false;

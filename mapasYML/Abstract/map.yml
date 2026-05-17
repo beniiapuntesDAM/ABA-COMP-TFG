@@ -1,7 +1,9 @@
 map:
   name: "Abstract"
+  mode: "CTW"
   version: "1.1.2"
   objective: "Capture the other team's wool to win!"
+  building: true
   authors:
     - uuid: "dff980ed-9f69-491e-b79c-30c21350baf2"
   teams:
@@ -582,13 +584,13 @@ map:
       color: "cyan"
       location: "-115.5,13,-82.5"
       monument:
-        block: "15.5,5,-74.5"
+        block: "15,5,-75"
 
     - team: "blue"
       color: "orange"
-      location: "12.5,13,-74.5"
+      location: "12,13,-74"
       monument:
-        block: "-118.5,5,-82.5"
+        block: "-119,5,-83"
 
   timelock: "on"
 

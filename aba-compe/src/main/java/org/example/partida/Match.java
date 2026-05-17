@@ -187,4 +187,15 @@ public class Match {
 
     /** @return scoreboard compartido de la partida */
     public Scoreboard getScoreboard() { return scoreboard; }
+    /**
+     * Quita a un jugador del equipo sin quitarle de el scoreboard
+     *
+     * @param p jugador a comprobar
+     */
+    public void quitarDeEquipoSinScoreboard(Player p) {
+        for (Set<Player> set : equipos.values()) {
+            set.remove(p);
+        }
+        // NO tocamos el scoreboard team, se mantiene el color en el TAB
+    }
 }

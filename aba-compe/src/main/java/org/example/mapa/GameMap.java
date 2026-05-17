@@ -5,100 +5,52 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.example.Main;
-import org.example.entity.mapa.BlockDropEntity;
-import org.example.entity.mapa.EquipoEntity;
-import org.example.entity.mapa.MapaEntity;
-import org.example.entity.mapa.RegionEntity;
+import org.example.entity.mapa.*;
+import org.example.entity.objetivo.ControlPointEntity;
+import org.example.entity.objetivo.JumpPadEntity;
+import org.example.gamemode.ctw.CTWConfig;
+import org.example.gamemode.koth.KOTHConfig;
 import org.example.entity.objetivo.WoolEntity;
 
 import java.io.File;
 import java.util.*;
+import org.bukkit.util.Vector;
 
-/**
- * Representa un mapa jugable del plugin.
- * Carga y almacena toda la configuración del mapa desde su archivo map.yml:
- * spawns, equipos, kits, armaduras, regiones, lanas y drops personalizados.
- */
 public class GameMap {
 
-    /** Kit base que reciben los jugadores al aparecer. */
+    private boolean buildingAllowed = true;
+    public boolean isBuildingAllowed() { return buildingAllowed; }
     private final List<ItemStack> spawnKit = new ArrayList<>();
-
-    /** Ítems que se entregan al jugador al realizar un kill. */
     private final List<ItemStack> killRewards = new ArrayList<>();
-
-    /** Drops personalizados asociados a bloques concretos. */
     private final List<BlockDropEntity> blockDrops = new ArrayList<>();
-
-    /** Materiales que se eliminan del inventario del jugador en ciertas situaciones. */
     private final List<Material> itemRemove = new ArrayList<>();
-
-    /** Regiones del mapa indexadas por su ID. */
     private final Map<String, RegionEntity> regions = new HashMap<>();
-
-    /** IDs de regiones donde la construcción está siempre prohibida. */
     private final List<String> neverBuildRegions = new ArrayList<>();
-
-    /** Regiones donde los jugadores pueden construir. */
     private final List<RegionEntity> buildRegions = new ArrayList<>();
-
-    /** Regiones excluidas del área de construcción aunque estén dentro de buildRegions. */
     private final List<RegionEntity> excludeRegions = new ArrayList<>();
-
-    /** Lanas (objetivos de captura) presentes en el mapa. */
     private final List<WoolEntity> wools = new ArrayList<>();
-
-    /** Materiales que se eliminan del mundo al iniciar la partida. */
     private final List<Material> deleteOnStart = new ArrayList<>();
-
-    /** Altura máxima de construcción permitida. */
+    private final List<EnterRuleEntity> enterRules = new ArrayList<>();
     private int maxBuildHeight = 0;
-
-    /** Altura mínima de construcción permitida. */
     private int minBuildHeight = 0;
-
-    /**
-     * Armadura base del spawn. Lista de 4 elementos en orden:
-     * botas (0), pantalones (1), pechera (2), casco (3).
-     * Las posiciones vacías son null.
-     */
     private final List<ItemStack> spawnArmor = new ArrayList<>(Arrays.asList(null, null, null, null));
-
-    /** Armaduras personalizadas por equipo, indexadas por ID de equipo en minúsculas. */
     private final Map<String, List<ItemStack>> teamArmor = new HashMap<>();
-
-    /** Instancia principal del plugin. */
     private final Main plugin;
-
-    /** Nombre del mapa, coincide con el directorio en maps/ y el mundo de Bukkit. */
     private final String mapName;
-
-    /** Punto de aparición para jugadores en modo espectador. */
     private Location spectatorSpawn;
-
-    /** Información general del mapa (ID interno y nombre legible). */
     private MapaEntity mapaEntity;
-
-    /** Spawns de cada equipo, indexados por ID de equipo. */
     private final Map<String, List<Location>> teamSpawns = new HashMap<>();
+    private String gameMode = "CTW";
+    private KOTHConfig kothConfig;
+    private CTWConfig ctwConfig;
+    private final List<JumpPadEntity> jumpPads = new ArrayList<>();
+    private final Map<String, Material> originalFloorBlocks = new HashMap<>();
 
-    /**
-     * Crea una nueva instancia de GameMap.
-     * Los datos no se cargan hasta llamar a {@link #load()}.
-     *
-     * @param plugin  instancia principal del plugin
-     * @param mapName nombre del mapa
-     */
     public GameMap(Main plugin, String mapName) {
         this.plugin = plugin;
         this.mapName = mapName;
     }
 
-    /**
-     * Carga toda la configuración del mapa desde maps/mapName/map.yml.
-     * Si el archivo no existe, registra un error y no inicializa ningún dato.
-     * Si no existe un mundo con el nombre del mapa, usa el mundo principal como fallback.
-     */
     public void load() {
         File mapFile = new File(plugin.getDataFolder() + "/maps/" + mapName + "/map.yml");
         System.out.println("Cargando mapa desde: " + mapFile.getPath());
@@ -112,23 +64,15 @@ public class GameMap {
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(mapFile);
 
         World world = Bukkit.getWorld(mapName);
-        if (world == null) {
-            world = Bukkit.getWorlds().get(0);
-        }
-
-
-        // SPECTATOR
+        if (world == null) world = Bukkit.getWorlds().get(0);
 
         double sx = cfg.getDouble("map.spectator.x");
         double sy = cfg.getDouble("map.spectator.y");
         double sz = cfg.getDouble("map.spectator.z");
         spectatorSpawn = new Location(world, sx, sy, sz);
 
-
-        // MAPA ENTITY
-
         mapaEntity = new MapaEntity(1, cfg.getString("map.name"));
-
+        buildingAllowed = cfg.getBoolean("map.building", true);
         putTeams(cfg);
         putSpawns(cfg, world);
         putKillReward(cfg);
@@ -139,14 +83,171 @@ public class GameMap {
         putRegions(cfg);
         putWools(cfg);
         putArmor(cfg);
+
+        gameMode = cfg.getString("map.mode", "CTW").toUpperCase();
+        if (gameMode.equals("KOTH")) putKoth(cfg,this);
+        if (gameMode.equals("CTW")) putCTW(cfg);
     }
 
-    /**
-     * Carga la armadura base del spawn y las armaduras específicas de cada equipo.
-     * Los equipos heredan la armadura base si se declaran como parents en el YAML.
-     *
-     * @param cfg configuración YAML del mapa
-     */
+    private void putCTW(YamlConfiguration cfg) {
+        int points = cfg.getInt("map.ctw.points-per-wool", 1);
+        boolean recover = cfg.getBoolean("map.ctw.allow-recover", true);
+        boolean anywhere = cfg.getBoolean("map.ctw.allow-place-anywhere", false);
+        ctwConfig = new CTWConfig(wools, points, recover, anywhere);
+    }
+
+    private void putKoth(YamlConfiguration cfg, GameMap gameMap) {
+
+        int pointsToWin = cfg.getInt("map.points-to-win", 2000);
+        int captureTime = cfg.getInt("map.capture-time", 8);
+        boolean incremental = cfg.getBoolean("map.incremental", true);
+        boolean neutralState = cfg.getBoolean("map.neutral-state", true);
+        boolean scaledTime = cfg.getBoolean("map.scaled-time", false);
+        double timeMultiplier = cfg.getDouble("map.time-multiplier", 1.0);
+        String floorMatStr = cfg.getString("map.floor-material", "white_terracotta");
+
+        List<ControlPointEntity> points = new ArrayList<>();
+
+        List<Map<?, ?>> list = cfg.getMapList("map.control-points");
+        if (list == null || list.isEmpty()) {
+            System.out.println("No control-points en config");
+            return;
+        }
+
+        for (Map<?, ?> cpData : list) {
+
+            String name = (String) cpData.get("name");
+            if (name == null) continue;
+
+            int pts = cpData.containsKey("points")
+                    ? ((Number) cpData.get("points")).intValue()
+                    : 1;
+
+            Map<?, ?> regionData = (Map<?, ?>) cpData.get("capture-region");
+            if (regionData == null) continue;
+
+            Object minObj = regionData.get("min");
+            Object maxObj = regionData.get("max");
+
+            if (minObj == null || maxObj == null) {
+                System.out.println("CP sin min/max: " + name);
+                continue;
+            }
+
+            String[] min = minObj.toString().split(",");
+            String[] max = maxObj.toString().split(",");
+
+            RegionEntity captureRegion = new RegionEntity(
+                    name, "cuboid",
+                    Double.parseDouble(min[0].trim()), Double.parseDouble(min[1].trim()), Double.parseDouble(min[2].trim()),
+                    Double.parseDouble(max[0].trim()), Double.parseDouble(max[1].trim()), Double.parseDouble(max[2].trim())
+            );
+
+            // Letter (fill region)
+            RegionEntity fillRegion = null;
+            Map<?, ?> letterData = (Map<?, ?>) regionData.get("letter");
+            if (letterData != null) {
+                Object lMinObj = letterData.get("min");
+                Object lMaxObj = letterData.get("max");
+                if (lMinObj != null && lMaxObj != null) {
+                    String[] lMin = lMinObj.toString().split(",");
+                    String[] lMax = lMaxObj.toString().split(",");
+                    fillRegion = new RegionEntity(
+                            name + "_fill", "cuboid",
+                            Double.parseDouble(lMin[0].trim()), Double.parseDouble(lMin[1].trim()), Double.parseDouble(lMin[2].trim()),
+                            Double.parseDouble(lMax[0].trim()), Double.parseDouble(lMax[1].trim()), Double.parseDouble(lMax[2].trim())
+                    );
+                }
+            }
+
+            // Floor region
+            RegionEntity floorRegion = null;
+            Map<?, ?> floorData = (Map<?, ?>) regionData.get("floor");
+            if (floorData != null) {
+                Object fMinObj = floorData.get("min");
+                Object fMaxObj = floorData.get("max");
+                if (fMinObj != null && fMaxObj != null) {
+                    String[] fMin = fMinObj.toString().split(",");
+                    String[] fMax = fMaxObj.toString().split(",");
+                    floorRegion = new RegionEntity(
+                            name + "_floor", "cuboid",
+                            Double.parseDouble(fMin[0].trim()), Double.parseDouble(fMin[1].trim()), Double.parseDouble(fMin[2].trim()),
+                            Double.parseDouble(fMax[0].trim()), Double.parseDouble(fMax[1].trim()), Double.parseDouble(fMax[2].trim())
+                    );
+                }
+            }
+
+            points.add(new ControlPointEntity(name, pts, captureRegion, fillRegion, floorRegion, floorMatStr, captureTime));
+            System.out.println("ControlPoint cargado: " + name);
+
+            // Jump pad
+            Map<?, ?> jumpData = (Map<?, ?>) cpData.get("jump_block");
+            if (jumpData == null) continue;
+
+            World world = Bukkit.getWorld(gameMap.getMapName());
+            if (world == null) {
+                System.out.println("World null");
+                continue;
+            }
+
+            List<Location> blocks = new ArrayList<>();
+
+            Object rawBlocks = jumpData.get("blocks");
+            if (rawBlocks instanceof List<?>) {
+                for (Object obj : (List<?>) rawBlocks) {
+                    String[] p = obj.toString().split(",");
+                    if (p.length < 3) continue;
+                    blocks.add(new Location(world,
+                            Integer.parseInt(p[0].trim()),
+                            Integer.parseInt(p[1].trim()),
+                            Integer.parseInt(p[2].trim())
+                    ));
+                }
+            } else {
+                Object minJ = jumpData.get("min");
+                Object maxJ = jumpData.get("max");
+                if (minJ == null || maxJ == null) continue;
+
+                String[] jMin = minJ.toString().split(",");
+                String[] jMax = maxJ.toString().split(",");
+                if (jMin.length < 3 || jMax.length < 3) continue;
+
+                blocks.add(new Location(world,
+                        Integer.parseInt(jMin[0].trim()),
+                        Integer.parseInt(jMin[1].trim()),
+                        Integer.parseInt(jMin[2].trim())
+                ));
+                blocks.add(new Location(world,
+                        Integer.parseInt(jMax[0].trim()),
+                        Integer.parseInt(jMax[1].trim()),
+                        Integer.parseInt(jMax[2].trim())
+                ));
+            }
+
+            double force = jumpData.containsKey("force")
+                    ? ((Number) jumpData.get("force")).doubleValue()
+                    : 1.5;
+
+            org.bukkit.util.Vector direction = new org.bukkit.util.Vector(0, 1, 0);
+            if (jumpData.get("direction") != null) {
+                String[] dir = jumpData.get("direction").toString().split(",");
+                if (dir.length == 3) {
+                    direction = new org.bukkit.util.Vector(
+                            Double.parseDouble(dir[0].trim()),
+                            Double.parseDouble(dir[1].trim()),
+                            Double.parseDouble(dir[2].trim())
+                    );
+                }
+            }
+
+            jumpPads.add(new JumpPadEntity(blocks, force, direction));
+            System.out.println("JumpPad cargado: " + name + " blocks=" + blocks.size() + " force=" + force + " dir=" + direction);
+        }
+
+        kothConfig = new KOTHConfig(pointsToWin, incremental, neutralState, scaledTime, timeMultiplier, points);
+        System.out.println("KOTHConfig cargado: " + points.size());
+    }
+
     private void putArmor(YamlConfiguration cfg) {
         if (cfg.isConfigurationSection("map.kits.spawn.armor")) {
             List<ItemStack> armor = loadArmorSection(cfg, "map.kits.spawn.armor", null);
@@ -160,13 +261,11 @@ public class GameMap {
                 if (kitId.equals("spawn")) continue;
 
                 String kitPath = "map.kits." + kitId;
-
                 List<ItemStack> parentArmor = new ArrayList<>(Arrays.asList(null, null, null, null));
+
                 if (cfg.isList(kitPath + ".parents")) {
                     for (String parent : cfg.getStringList(kitPath + ".parents")) {
-                        if (parent.equals("spawn")) {
-                            parentArmor = new ArrayList<>(spawnArmor);
-                        }
+                        if (parent.equals("spawn")) parentArmor = new ArrayList<>(spawnArmor);
                     }
                 }
 
@@ -177,17 +276,6 @@ public class GameMap {
         }
     }
 
-    /**
-     * Lee una sección de armadura del YAML y devuelve una lista de 4 piezas
-     * (botas, pantalones, pechera, casco). Las piezas no definidas se heredan
-     * de parentArmor si se proporciona. Soporta irrompibilidad, color para
-     * armadura de cuero y encantamientos.
-     *
-     * @param cfg         configuración YAML del mapa
-     * @param path        ruta a la sección de armadura dentro del YAML
-     * @param parentArmor armadura base a heredar; puede ser null
-     * @return lista de 4 ItemStack con las piezas de armadura (null en posiciones vacías)
-     */
     private List<ItemStack> loadArmorSection(YamlConfiguration cfg, String path, List<ItemStack> parentArmor) {
         String[] slots = {"boots", "leggings", "chestplate", "helmet"};
         List<ItemStack> result = new ArrayList<>(Arrays.asList(null, null, null, null));
@@ -255,29 +343,17 @@ public class GameMap {
         return result;
     }
 
-    /**
-     * Carga los equipos del mapa y los registra en el MapaEntity.
-     * Lee el ID, color y número máximo de jugadores de cada equipo.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void putTeams(YamlConfiguration cfg) {
         if (cfg.isConfigurationSection("map.teams")) {
             for (String key : cfg.getConfigurationSection("map.teams").getKeys(false)) {
                 String id = cfg.getString("map.teams." + key + ".id");
                 String color = cfg.getString("map.teams." + key + ".color");
                 int max = cfg.getInt("map.teams." + key + ".max");
-                EquipoEntity eq = new EquipoEntity(id, color, max);
-                mapaEntity.addEquipo(eq);
+                mapaEntity.addEquipo(new EquipoEntity(id, color, max));
             }
         }
     }
 
-    /**
-     * Carga la lista de materiales que se eliminarán del mundo al iniciar la partida.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void putDeleteOnStart(YamlConfiguration cfg) {
         if (cfg.isList("map.delete-on-start")) {
             for (Map<?, ?> data : cfg.getMapList("map.delete-on-start")) {
@@ -290,19 +366,13 @@ public class GameMap {
         }
     }
 
-    /**
-     * Carga las recompensas de ítems que recibe un jugador al eliminar a otro.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void putKillReward(YamlConfiguration cfg) {
         if (cfg.isList("map.kill-rewards")) {
             for (Map<?, ?> rewardData : cfg.getMapList("map.kill-rewards")) {
                 if (rewardData.containsKey("items")) {
                     for (Map<?, ?> itemData : (List<Map<?, ?>>) rewardData.get("items")) {
                         String matName = (String) itemData.get("material");
-                        int amount = itemData.containsKey("amount")
-                                ? ((Number) itemData.get("amount")).intValue() : 1;
+                        int amount = itemData.containsKey("amount") ? ((Number) itemData.get("amount")).intValue() : 1;
                         Material mat = Material.matchMaterial(matName);
                         if (mat == null) {
                             System.out.println("ERROR kill-reward material inválido: " + matName);
@@ -315,13 +385,6 @@ public class GameMap {
         }
     }
 
-    /**
-     * Carga los puntos de spawn de cada equipo a partir de la sección map.spawns.
-     * Cada spawn incluye coordenadas X, Y, Z y orientación yaw.
-     *
-     * @param cfg   configuración YAML del mapa
-     * @param world mundo donde se sitúan las posiciones de spawn
-     */
     private void putSpawns(YamlConfiguration cfg, World world) {
         if (cfg.isConfigurationSection("map.spawns")) {
             for (String teamId : cfg.getConfigurationSection("map.spawns").getKeys(false)) {
@@ -338,20 +401,11 @@ public class GameMap {
         }
     }
 
-    /**
-     * Carga los drops personalizados de bloques definidos en map.block-drops.
-     * Cada entrada indica qué bloques afecta, qué ítems suelta y con qué herramientas,
-     * así como si se aplica también con la herramienta incorrecta.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void blockDropsMap(YamlConfiguration cfg) {
         if (cfg.isList("map.block-drops")) {
             System.out.println("Block-drops encontrados: " + cfg.getMapList("map.block-drops").size());
             for (Map<?, ?> dropData : cfg.getMapList("map.block-drops")) {
-
-                boolean wrongTool = dropData.containsKey("wrong-tool")
-                        && Boolean.TRUE.equals(dropData.get("wrong-tool"));
+                boolean wrongTool = dropData.containsKey("wrong-tool") && Boolean.TRUE.equals(dropData.get("wrong-tool"));
 
                 Map<?, ?> filter = (Map<?, ?>) dropData.get("filter");
                 if (filter == null) continue;
@@ -362,53 +416,30 @@ public class GameMap {
                 List<ItemStack> drops = new ArrayList<>();
                 for (Map<?, ?> itemData : (List<Map<?, ?>>) dropData.get("drops")) {
                     String matName = (String) itemData.get("material");
-                    int amount = itemData.containsKey("amount")
-                            ? ((Number) itemData.get("amount")).intValue() : 1;
+                    int amount = itemData.containsKey("amount") ? ((Number) itemData.get("amount")).intValue() : 1;
                     Material mat = Material.matchMaterial(matName);
-                    if (mat != null) {
-                        drops.add(new ItemStack(mat, amount));
-                    } else {
-                        System.out.println("ERROR block-drop material inválido: " + matName);
-                    }
+                    if (mat != null) drops.add(new ItemStack(mat, amount));
+                    else System.out.println("ERROR block-drop material inválido: " + matName);
                 }
 
                 List<Material> tools = new ArrayList<>();
-                System.out.println("Keys en dropData: " + dropData.keySet());
-
                 if (dropData.containsKey("tools")) {
                     for (String toolName : (List<String>) dropData.get("tools")) {
                         Material mat = Material.matchMaterial(toolName);
-                        if (mat != null) {
-                            tools.add(mat);
-                            System.out.println("Tool registrada: " + toolName);
-                        } else {
-                            System.out.println("ERROR tool inválida: " + toolName);
-                        }
+                        if (mat != null) tools.add(mat);
+                        else System.out.println("ERROR tool inválida: " + toolName);
                     }
-                } else {
-                    System.out.println("no se encontro tool en dropsdata");
                 }
 
                 for (Object matName : materials) {
                     Material mat = Material.matchMaterial((String) matName);
-                    if (mat != null) {
-                        blockDrops.add(new BlockDropEntity(mat, drops, wrongTool, tools));
-                        System.out.println("BlockDrop registrado: " + matName + " wrongTool: " + wrongTool + " tools: " + tools.size());
-                    } else {
-                        System.out.println("ERROR block-drop filter material inválido: " + matName);
-                    }
+                    if (mat != null) blockDrops.add(new BlockDropEntity(mat, drops, wrongTool, tools));
+                    else System.out.println("ERROR block-drop filter material inválido: " + matName);
                 }
             }
         }
     }
 
-    /**
-     * Carga el kit base del spawn (map.kits.spawn.items) y lo almacena en spawnKit.
-     * Cada ítem se coloca en el slot de inventario indicado en el YAML.
-     * Soporta irrompibilidad y encantamientos por ítem.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void kitTeam(YamlConfiguration cfg) {
         if (cfg.isList("map.kits.spawn.items")) {
             List<Map<?, ?>> items = cfg.getMapList("map.kits.spawn.items");
@@ -417,10 +448,8 @@ public class GameMap {
             for (Map<?, ?> itemData : items) {
                 int slot = ((Number) itemData.get("slot")).intValue();
                 String matName = (String) itemData.get("material");
-                boolean unbreakable = itemData.containsKey("unbreakable")
-                        && Boolean.TRUE.equals(itemData.get("unbreakable"));
-                int amount = itemData.containsKey("amount")
-                        ? ((Number) itemData.get("amount")).intValue() : 1;
+                boolean unbreakable = itemData.containsKey("unbreakable") && Boolean.TRUE.equals(itemData.get("unbreakable"));
+                int amount = itemData.containsKey("amount") ? ((Number) itemData.get("amount")).intValue() : 1;
 
                 Material mat = Material.matchMaterial(matName);
                 if (mat == null) {
@@ -440,11 +469,8 @@ public class GameMap {
                             org.bukkit.enchantments.Enchantment enchantment = Registry.ENCHANTMENT.get(
                                     org.bukkit.NamespacedKey.minecraft(enchantName)
                             );
-                            if (enchantment != null) {
-                                meta.addEnchant(enchantment, level, true);
-                            } else {
-                                System.out.println("ERROR: Encantamiento inválido: " + enchantName);
-                            }
+                            if (enchantment != null) meta.addEnchant(enchantment, level, true);
+                            else System.out.println("ERROR: Encantamiento inválido: " + enchantName);
                         }
                     }
                     item.setItemMeta(meta);
@@ -457,91 +483,98 @@ public class GameMap {
         }
     }
 
-    /**
-     * Carga la lista de materiales que se eliminan del inventario del jugador
-     * en ciertas situaciones, definidos en map.itemremove.items.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void itemRemoves(YamlConfiguration cfg) {
         if (cfg.isList("map.itemremove.items")) {
             for (String matName : cfg.getStringList("map.itemremove.items")) {
                 Material mat = Material.matchMaterial(matName);
-                if (mat != null) {
-                    itemRemove.add(mat);
-                } else {
-                    System.out.println("ERROR itemremove material inválido: " + matName);
-                }
+                if (mat != null) itemRemove.add(mat);
+                else System.out.println("ERROR itemremove material inválido: " + matName);
             }
             System.out.println("ItemRemove cargado: " + itemRemove.size() + " materiales");
         }
     }
 
-    /**
-     * Carga las lanas (objetivos) del mapa desde map.wools.
-     * Cada lana tiene un equipo propietario, un color, una posición en el mapa
-     * y una posición de monumento donde debe colocarse para puntuar.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void putWools(YamlConfiguration cfg) {
-        if (cfg.isList("map.wools")) {
-            for (Map<?, ?> woolData : cfg.getMapList("map.wools")) {
-                String team = (String) woolData.get("team");
-                String color = (String) woolData.get("color");
+        if (!cfg.isList("map.wools")) {
+            System.out.println("[CTW] No se encontraron wools en map.wools");
+            return;
+        }
 
-                String[] loc = ((String) woolData.get("location")).split(",");
-                double locX = Double.parseDouble(loc[0].trim());
-                double locY = Double.parseDouble(loc[1].trim());
-                double locZ = Double.parseDouble(loc[2].trim());
+        for (Map<?, ?> woolData : cfg.getMapList("map.wools")) {
+            String team = (String) woolData.get("team");
+            String color = (String) woolData.get("color");
 
-                Map<?, ?> monument = (Map<?, ?>) woolData.get("monument");
-                String[] mon = ((String) monument.get("block")).split(",");
-                double monX = Double.parseDouble(mon[0].trim());
-                double monY = Double.parseDouble(mon[1].trim());
-                double monZ = Double.parseDouble(mon[2].trim());
+            String[] loc = ((String) woolData.get("location")).split(",");
+            double locX = Double.parseDouble(loc[0].trim());
+            double locY = Double.parseDouble(loc[1].trim());
+            double locZ = Double.parseDouble(loc[2].trim());
 
+            Map<?, ?> monument = (Map<?, ?>) woolData.get("monument");
+            String[] mon = ((String) monument.get("block")).split(",");
+            double monX = Double.parseDouble(mon[0].trim());
+            double monY = Double.parseDouble(mon[1].trim());
+            double monZ = Double.parseDouble(mon[2].trim());
 
-                Material mat = Material.matchMaterial(color + "_wool");
-                if (mat == null) {
-                    System.out.println("ERROR wool color inválido: " + color);
-                    continue;
-                }
-
-                wools.add(new WoolEntity(team, mat, locX, locY, locZ, monX, monY, monZ));
-                System.out.println("Wool cargada: " + team + " " + color);
+            Material mat = Material.matchMaterial(color + "_wool");
+            if (mat == null) {
+                System.out.println("[CTW] ERROR wool color inválido: " + color);
+                continue;
             }
+
+            wools.add(new WoolEntity(team, mat, locX, locY, locZ, monX, monY, monZ));
+            System.out.println("[CTW] Wool cargada: team=" + team + " color=" + color + " mon=" + monX + "," + monY + "," + monZ);
         }
     }
 
-    /**
-     * Carga todas las regiones del mapa: regiones de construcción prohibida (never),
-     * regiones simples identificadas por ID, regiones hijas de construcción (buildRegions),
-     * regiones de exclusión (excludeRegions) y los límites de altura de construcción.
-     * Soporta tipos de región cuboid y rectangle.
-     *
-     * @param cfg configuración YAML del mapa
-     */
     private void putRegions(YamlConfiguration cfg) {
-
+        // NEVER BUILD y ENTER RULES desde apply
         if (cfg.isList("map.regions.apply")) {
             for (Map<?, ?> applyData : cfg.getMapList("map.regions.apply")) {
-                if (!"never".equals(applyData.get("block"))) continue;
 
-                Object regionObj = applyData.get("region");
-                if (regionObj instanceof List) {
-                    for (Object r : (List<?>) regionObj) {
-                        neverBuildRegions.add((String) r);
-                        System.out.println("Never build region: " + r);
+                // NEVER BUILD
+                if ("never".equals(applyData.get("block"))) {
+                    Object regionObj = applyData.get("region");
+                    if (regionObj instanceof List) {
+                        for (Object r : (List<?>) regionObj) {
+                            neverBuildRegions.add((String) r);
+                            System.out.println("Never build region: " + r);
+                        }
+                    } else if (regionObj instanceof String) {
+                        neverBuildRegions.add((String) regionObj);
+                        System.out.println("Never build region: " + regionObj);
                     }
-                } else if (regionObj instanceof String) {
-                    neverBuildRegions.add((String) regionObj);
-                    System.out.println("Never build region: " + regionObj);
+                }
+
+                // ENTER RULES
+                if (applyData.containsKey("enter")) {
+                    String filterName = (String) applyData.get("enter");
+                    String message = applyData.containsKey("message") ? (String) applyData.get("message") : "§cNo puedes entrar aquí.";
+
+                    String teamId = null;
+                    if (filterName.startsWith("only-")) {
+                        teamId = filterName.replace("only-", "");
+                    }
+                    if (teamId == null) continue;
+
+                    Object regionObj = applyData.get("region");
+                    List<String> regionIds = new ArrayList<>();
+                    if (regionObj instanceof List) {
+                        for (Object r : (List<?>) regionObj) regionIds.add((String) r);
+                    } else if (regionObj instanceof String) {
+                        regionIds.add((String) regionObj);
+                    }
+
+                    // Las regiones pueden no estar cargadas aún, las guardamos por ID para resolver después
+                    for (String regionId : regionIds) {
+                        // Guardamos como EnterRule pendiente con regionId como placeholder
+                        enterRules.add(new EnterRuleEntity(teamId, regionId, message));
+                        System.out.println("EnterRule registrada: solo " + teamId + " en " + regionId);
+                    }
                 }
             }
         }
 
-
+        // REGIONES CUBOID SIMPLES
         if (cfg.isConfigurationSection("map.regions")) {
             for (String regionId : cfg.getConfigurationSection("map.regions").getKeys(false)) {
                 String path = "map.regions." + regionId;
@@ -564,7 +597,7 @@ public class GameMap {
             }
         }
 
-
+        // BUILD REGIONS
         int regionCounter = 0;
         for (Map<?, ?> child : cfg.getMapList("map.regions.regions.children")) {
             String id = (String) child.get("id");
@@ -602,7 +635,7 @@ public class GameMap {
             }
         }
 
-
+        // EXCLUDE REGIONS
         for (Map<?, ?> subtract : cfg.getMapList("map.regions.build-region.subtract")) {
             String id = (String) subtract.get("id");
             String type = (String) subtract.get("type");
@@ -624,80 +657,46 @@ public class GameMap {
             System.out.println("ExcludeRegion cargada: " + id);
         }
 
+        // Resolver EnterRules con las regiones ya cargadas
+        for (EnterRuleEntity rule : enterRules) {
+            if (rule.getRegion() == null) {
+                RegionEntity region = regions.get(rule.getRegionId());
+                if (region != null) {
+                    rule.setRegion(region);
+                    System.out.println("EnterRule resuelta: solo " + rule.getTeamId() + " en " + rule.getRegionId());
+                } else {
+                    System.out.println("ERROR EnterRule: región no encontrada: " + rule.getRegionId());
+                }
+            }
+        }
+
         minBuildHeight = cfg.getInt("map.regions.minBuildHeight", 0);
         maxBuildHeight = cfg.getInt("map.maxbuildheight", 0);
     }
 
-
     // Getters
-
-
-    /** @return spawn del espectador */
     public Location getSpectatorSpawn() { return spectatorSpawn; }
-
-    /** @return entidad con la información general del mapa */
     public MapaEntity getMapaEntity() { return mapaEntity; }
-
-    /**
-     * Devuelve la lista de spawns del equipo indicado.
-     *
-     * @param teamId ID del equipo
-     * @return lista de locations de spawn, vacía si el equipo no existe
-     */
-    public List<Location> getTeamSpawns(String teamId) {
-        return teamSpawns.getOrDefault(teamId.toLowerCase(), new ArrayList<>());
-    }
-
-    /** @return kit base de items del spawn */
+    public List<Location> getTeamSpawns(String teamId) { return teamSpawns.getOrDefault(teamId.toLowerCase(), new ArrayList<>()); }
     public List<ItemStack> getSpawnKit() { return spawnKit; }
-
-    /** @return ítems de recompensa por kill */
     public List<ItemStack> getKillRewards() { return killRewards; }
-
-    /** @return drops personalizados de bloques */
     public List<BlockDropEntity> getBlockDrops() { return blockDrops; }
-
-    /** @return materiales que se eliminan del inventario */
     public List<Material> getItemRemove() { return itemRemove; }
-
-    /** @return mapa de regiones indexadas por ID */
     public Map<String, RegionEntity> getRegions() { return regions; }
-
-    /** @return IDs de regiones con construcción siempre prohibida */
     public List<String> getNeverBuildRegions() { return neverBuildRegions; }
-
-    /** @return altura máxima de construcción */
     public int getMaxBuildHeight() { return maxBuildHeight; }
-
-    /** @return altura mínima de construcción */
     public int getMinBuildHeight() { return minBuildHeight; }
-
-    /** @return lista de lanas (objetivos) del mapa */
     public List<WoolEntity> getWools() { return wools; }
-
-    /** @return regiones excluidas del área de construcción */
     public List<RegionEntity> getExcludeRegions() { return excludeRegions; }
-
-    /** @return regiones donde se permite construir */
     public List<RegionEntity> getBuildRegions() { return buildRegions; }
-
-    /** @return nombre del mapa */
     public String getMapName() { return mapName; }
-
-    /** @return materiales que se eliminan al iniciar la partida */
     public List<Material> getDeleteOnStart() { return deleteOnStart; }
-
-    /** @return armadura base del spawn */
     public List<ItemStack> getSpawnArmor() { return spawnArmor; }
-
-    /**
-     * Devuelve la armadura del kit indicado. Si el kit no tiene armadura propia,
-     * devuelve la armadura base del spawn.
-     *
-     * @param kitId ID del kit de equipo
-     * @return lista de 4 piezas de armadura
-     */
-    public List<ItemStack> getTeamArmor(String kitId) {
-        return teamArmor.getOrDefault(kitId.toLowerCase(), spawnArmor);
-    }
+    public List<ItemStack> getTeamArmor(String kitId) { return teamArmor.getOrDefault(kitId.toLowerCase(), spawnArmor); }
+    public String getGameMode() { return gameMode; }
+    public KOTHConfig getKothConfig() { return kothConfig; }
+    public CTWConfig getCtwConfig() { return ctwConfig; }
+    public List<EnterRuleEntity> getEnterRules() { return enterRules; }
+    public List<JumpPadEntity> getJumpPads() { return jumpPads; }
+    public Map<String, Material> getOriginalFloorBlocks() { return originalFloorBlocks; }
 }

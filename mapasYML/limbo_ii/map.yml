@@ -1,0 +1,172 @@
+map:
+  name: "Limbo II"
+  mode: "KOTH"
+
+  spectator:
+    x: 0.5
+    y: 42.0
+    z: 0.5
+
+  building: false
+
+  teams:
+    orange:
+      id: "orange"
+      color: "GOLD"
+      max: 10
+
+    cyan:
+      id: "cyan"
+      color: "DARK_AQUA"
+      max: 10
+
+  spawns:
+    orange:
+      - x: -52.5
+        y: 19.0
+        z: 0.5
+        yaw: -90
+
+    cyan:
+      - x: 53.5
+        y: 19.0
+        z: 0.5
+        yaw: 90
+
+  kits:
+    spawn:
+      items:
+        - slot: 0
+          material: stone_sword
+
+        - slot: 1
+          material: bow
+          enchantments:
+            infinity: 1
+
+        - slot: 28
+          material: arrow
+          amount: 1
+
+    orange-kit:
+      parents:
+        - spawn
+
+      armor:
+        helmet:
+          material: leather_helmet
+          color: "D87F33"
+          unbreakable: true
+
+        chestplate:
+          material: leather_chestplate
+          color: "D87F33"
+          unbreakable: true
+
+        leggings:
+          material: iron_leggings
+          unbreakable: true
+
+        boots:
+          material: leather_boots
+          color: "D87F33"
+          unbreakable: true
+
+    cyan-kit:
+      parents:
+        - spawn
+
+      armor:
+        helmet:
+          material: leather_helmet
+          color: "4C7F99"
+          unbreakable: true
+
+        chestplate:
+          material: leather_chestplate
+          color: "4C7F99"
+          unbreakable: true
+
+        leggings:
+          material: iron_leggings
+          unbreakable: true
+
+        boots:
+          material: leather_boots
+          color: "4C7F99"
+          unbreakable: true
+          
+  floor-material: "white_terracotta"
+
+  control-points:
+    - name: "Point A"
+      points: 3
+
+      capture-region:
+        min: "-2,18,9"
+        max: "3,22,14"
+
+        floor:
+          min: "-2,18,9"
+          max: "3,18,14"
+
+        letter:
+          min: "0,25,9"
+          max: "0,31,13"
+
+      jump_block:
+        blocks: 
+          - "0,6,25"
+        force: 2.0
+        direction: "0,1,0"
+
+    - name: "Point B"
+      points: 3
+
+      capture-region:
+        min: "-2,18,-13"
+        max: "3,22,-8"
+
+        floor:
+          min: "-2,18,-13"
+          max: "3,18,-8"
+
+        letter:
+          min: "0,25,-13"
+          max: "0,31,-7"
+
+      jump_block:
+        blocks:
+          - "0,6,-24"
+        force: 2.0
+        direction: "0,1,0"
+
+    - name: "Point C"
+      points: 4
+
+      capture-region:
+        min: "-2,8,-2"
+        max: "3,12,3"
+
+        floor:
+          min: "-2,8,-2"
+          max: "3,12,3"
+
+        letter:
+          min: "0,20,-2"
+          max: "0,26,2"
+
+  itemremove:
+    items:
+      - arrow
+      - leather_helmet
+      - leather_chestplate
+      - iron_leggings
+      - leather_boots
+
+  kill-rewards:
+    - items:
+        - material: golden_apple
+          amount: 1
+
+  

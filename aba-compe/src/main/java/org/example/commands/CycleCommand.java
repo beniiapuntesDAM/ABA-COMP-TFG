@@ -101,7 +101,18 @@ public class CycleCommand implements CommandExecutor {
 
                 GameMap map = new GameMap(plugin, mapName);
                 map.load();
-
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    World w = Bukkit.getWorld(mapName);
+                    if (w != null) {
+                        w.setTime(6000);
+                        w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+                        w.setStorm(false);
+                        w.setThundering(false);
+                        w.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+                        w.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+                        w.setGameRule(GameRule.MOB_GRIEFING, false);
+                    }
+                }, 20L);
                 if (map.getMapaEntity() == null) {
                     sender.sendMessage("§cNo se pudo cargar el mapa " + mapName);
                     return;

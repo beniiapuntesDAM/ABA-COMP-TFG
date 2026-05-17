@@ -65,4 +65,11 @@ public class RegionEntity {
 
     /** @return tipo de región ({@code "cuboid"} o {@code "rectangle"}) */
     public String getType() { return type; }
+
+    public double getMinX() { return minX; }
+    public double getMaxX() { return maxX; }
+    public double getMinY() { return minY; }
+    public double getMaxY() { return maxY; }
+    public double getMinZ() { return minZ; }
+    public double getMaxZ() { return maxZ; }
 }

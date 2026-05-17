@@ -11,65 +11,33 @@ import org.bukkit.scheduler.BukkitTask;
 import org.example.Main;
 import org.example.entity.jugador.JugadorEntity;
 import org.example.entity.mapa.EquipoEntity;
+import org.example.gamemode.koth.KOTHHandler;
 import org.example.mapa.GameMap;
+import org.example.scoreboard.KOTHScoreboard;
 import org.example.scoreboard.WoolScoreboard;
 import org.example.stats.StatsManager;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-/**
- * Gestiona el ciclo de vida completo de una partida: cuenta atrás,
- * inicio, temporizador, fin y reparto de victorias y derrotas.
- * Controla la BossBar de cuenta atrás y la BossBar del tiempo restante.
- */
 public class GameMatch {
 
-    /** Segundos restantes de la cuenta atrás previa al inicio. */
     private int countdown = 30;
-
-    /** Tarea periódica de la cuenta atrás. */
     private BukkitTask countdownTask;
-
-    /** BossBar mostrada durante la cuenta atrás. */
     private BossBar countdownBar;
-
-    /** BossBar mostrada durante la partida con el tiempo restante. */
     private BossBar matchBar;
-
-    /** Tarea periódica del temporizador de partida. */
     private BukkitTask matchTask;
-
-    /** Mapa en el que se disputa la partida. */
     private final GameMap gameMap;
-
-    /** Número máximo de jugadores por equipo, determina la duración de la partida. */
     private final int playersPerTeam;
-
-    /** IDs de equipos que han tocado al menos una lana durante la partida. */
     private final Set<String> equiposTocaron = new HashSet<>();
-
-    /** Referencia a la partida de equipos con la asignación jugador-equipo. */
     private final Match match;
-
-    /** Segundos restantes de la partida. */
     private int timeLeft;
-
-    /** Indica si la partida está en curso. */
     private boolean started = false;
-
-    /** Scoreboard de lanas que muestra el estado de los objetivos. */
     private WoolScoreboard woolScoreboard;
+    private KOTHHandler kothHandler;
 
-    /**
-     * Crea una nueva instancia de GameMatch.
-     * La duración se determina automáticamente según el tamaño del equipo:
-     * 20 minutos para equipos de hasta 5 jugadores, 40 minutos para equipos mayores.
-     *
-     * @param gameMap mapa en el que se disputará la partida
-     * @param match   asignación de jugadores a equipos
-     */
     public GameMatch(GameMap gameMap, Match match) {
         this.gameMap = gameMap;
         this.match = match;
@@ -84,30 +52,19 @@ public class GameMatch {
         }
     }
 
-    /**
-     * Formatea una cantidad de segundos en el formato MM:SS.
-     *
-     * @param seconds segundos a formatear
-     * @return cadena con el formato {@code MM:SS}
-     */
     private String formatTime(int seconds) {
         int m = seconds / 60;
         int s = seconds % 60;
         return String.format("%02d:%02d", m, s);
     }
 
-    /**
-     * Inicia la partida. Elimina los bloques marcados en deleteOnStart,
-     * teleporta a cada jugador a su spawn de equipo, le entrega su kit y armadura,
-     * activa el estado de partida y arranca el temporizador con su BossBar.
-     * Si la partida ya estaba iniciada, el método no hace nada.
-     */
     public void start() {
         System.out.println("GAMEMATCH START EJECUTADO");
 
         if (started) return;
         started = true;
 
+        // 1. Eliminar bloques marcados en deleteOnStart
         World world = Bukkit.getWorld(gameMap.getMapName());
         if (world != null && !gameMap.getDeleteOnStart().isEmpty()) {
             for (Chunk chunk : world.getLoadedChunks()) {
@@ -126,19 +83,34 @@ public class GameMatch {
 
         Bukkit.broadcastMessage("§aLa partida ha comenzado.");
 
+        // 2. Ocultar jugadores sin equipo
         for (Player p : Bukkit.getOnlinePlayers()) {
             String team = match.getTeamOf(p);
-            for (Player otherPlayer : Bukkit.getOnlinePlayers()) {
-                if (p == otherPlayer) continue;
-                String otherTeam = match.getTeamOf(otherPlayer);
+            for (Player other : Bukkit.getOnlinePlayers()) {
+                if (p == other) continue;
+                String otherTeam = match.getTeamOf(other);
                 if (team != null && otherTeam == null) {
-                    p.hidePlayer(Main.get(), otherPlayer);
+                    p.hidePlayer(Main.get(), other);
                 } else {
-                    p.showPlayer(Main.get(), otherPlayer);
+                    p.showPlayer(Main.get(), other);
                 }
             }
         }
 
+        // 3. MODO CTW → crear scoreboard ANTES de teleportar jugadores
+        System.out.println("[CTW] gameMode: " + gameMap.getGameMode());
+        System.out.println("[CTW] ctwConfig null? " + (gameMap.getCtwConfig() == null));
+        System.out.println("[CTW] equipos en mapa: " + gameMap.getMapaEntity().getEquipos().size());
+        System.out.println("[CTW] wools en mapa: " + gameMap.getWools().size());
+
+        if (gameMap.getGameMode().equals("CTW") && gameMap.getCtwConfig() != null) {
+            woolScoreboard = new WoolScoreboard(gameMap, match);
+            System.out.println("[CTW] WoolScoreboard creado correctamente");
+        } else {
+            System.out.println("[CTW] WoolScoreboard NO creado - mode=" + gameMap.getGameMode() + " ctwConfig=" + gameMap.getCtwConfig());
+        }
+
+        // 4. Teleport, kits y armadura
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.setHealth(p.getMaxHealth());
             p.setFoodLevel(20);
@@ -152,9 +124,7 @@ public class GameMatch {
             }
 
             List<Location> spawns = gameMap.getTeamSpawns(team);
-            if (!spawns.isEmpty()) {
-                p.teleport(spawns.get(0));
-            }
+            if (!spawns.isEmpty()) p.teleport(spawns.get(0));
 
             p.setGameMode(GameMode.SURVIVAL);
             p.getInventory().clear();
@@ -162,9 +132,7 @@ public class GameMatch {
             List<ItemStack> kit = gameMap.getSpawnKit();
             for (int i = 0; i < kit.size(); i++) {
                 ItemStack item = kit.get(i);
-                if (item != null) {
-                    p.getInventory().setItem(i, item.clone());
-                }
+                if (item != null) p.getInventory().setItem(i, item.clone());
             }
 
             String kitId = team + "-kit";
@@ -176,25 +144,29 @@ public class GameMatch {
             }
             p.getInventory().setArmorContents(armorArray);
 
+            // Asignar scoreboard por equipo
+            if (woolScoreboard != null) {
+                woolScoreboard.asignarAJugador(p, team);
+            }
+
             Bukkit.broadcastMessage("DEBUG TEAM OF " + p.getName() + ": " + match.getTeamOf(p));
         }
 
         MatchManager.get().setInGame(true);
 
+        // 5. BossBar del tiempo restante
         matchBar = Bukkit.createBossBar(
                 "Tiempo restante: " + formatTime(timeLeft),
                 BarColor.GREEN,
                 BarStyle.SOLID
         );
-
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            matchBar.addPlayer(p);
-        }
+        for (Player p : Bukkit.getOnlinePlayers()) matchBar.addPlayer(p);
 
         int totalTime = (playersPerTeam <= 5 ? 20 * 60 : 40 * 60);
+
+        // 6. Temporizador principal
         matchTask = Bukkit.getScheduler().runTaskTimer(Main.get(), () -> {
             timeLeft--;
-
             matchBar.setTitle("Tiempo restante: " + formatTime(timeLeft));
             matchBar.setProgress(Math.max(0, (double) timeLeft / totalTime));
 
@@ -207,60 +179,81 @@ public class GameMatch {
             }
 
             if (timeLeft <= 0) {
+                if (gameMap.getGameMode().equals("KOTH") && kothHandler != null) {
+                    String winner = kothHandler.getTeamPoints().entrySet().stream()
+                            .max(Map.Entry.comparingByValue())
+                            .map(Map.Entry::getKey)
+                            .orElse(null);
+                    end(winner);
+                    return;
+                }
                 if (equiposTocaron.size() == 1) {
                     end(equiposTocaron.iterator().next());
-                } else {
-                    end(null);
+                    return;
                 }
+                end(null);
             }
         }, 20L, 20L);
+
+        // 7. MODO KOTH
+        if (gameMap.getGameMode().equals("KOTH") && gameMap.getKothConfig() != null) {
+            kothHandler = new KOTHHandler(Main.get(), gameMap.getKothConfig());
+            kothHandler.setGameMap(gameMap);
+            kothHandler.setMatch(match);
+            kothHandler.setOnWin(() -> {
+                String winner = kothHandler.getTeamPoints().entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
+                end(winner);
+            });
+            kothHandler.start();
+            KOTHScoreboard kothScoreboard = new KOTHScoreboard(match, kothHandler, gameMap);
+            kothHandler.setScoreboard(kothScoreboard);
+        }
     }
 
-    /**
-     * Finaliza la partida, cancela el temporizador, registra victorias y derrotas
-     * y notifica a los jugadores. Si la partida no estaba en curso, no hace nada.
-     *
-     * @param winnerTeam ID del equipo ganador, o {@code null} si hubo empate
-     */
     public void end(String winnerTeam) {
         if (!started) return;
         started = false;
 
         if (matchTask != null) matchTask.cancel();
         if (matchBar != null) matchBar.removeAll();
+        if (kothHandler != null) kothHandler.stop();
 
         MatchManager.get().setInGame(false);
         MatchManager.get().setNeedsCycle(true);
 
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            String team = match.getTeamOf(p);
-            if (team == null) continue;
-            JugadorEntity j = StatsManager.get().getJugador(p.getUniqueId(), p.getName());
-            if (winnerTeam != null && team.equalsIgnoreCase(winnerTeam)) {
-                j.addWin();
-            } else {
-                j.addLoss();
-            }
+        // Mensaje de victoria
+        if (winnerTeam != null) {
+            Bukkit.broadcastMessage("§6¡El equipo §e" + winnerTeam + " §6ha ganado la partida!");
+        } else {
+            Bukkit.broadcastMessage("§6¡La partida ha terminado en empate!");
         }
 
-        Bukkit.broadcastMessage("§cLa partida ha terminado.");
-
+        // Stats y sacar de equipo
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.setPlayerListHeader("");
+            String team = match.getTeamOf(p);
+            if (team != null) {
+                JugadorEntity j = StatsManager.get().getJugador(p.getUniqueId(), p.getName());
+                if (winnerTeam != null && team.equalsIgnoreCase(winnerTeam)) {
+                    j.addWin();
+                } else {
+                    j.addLoss();
+                }
+                match.quitarDeEquipoSinScoreboard(p);
+            }
 
+            p.getInventory().clear();
+            p.getInventory().setArmorContents(new ItemStack[4]);
             p.setGameMode(GameMode.CREATIVE);
-            p.setPlayerListHeader("§cPartida terminada");
+            Location spectatorSpawn = gameMap.getSpectatorSpawn();
+            if (spectatorSpawn != null) p.teleport(spectatorSpawn);
+            p.setPlayerListHeader("§6" + (winnerTeam != null ? "§eGana: §6" + winnerTeam : "§6Empate"));
             p.setPlayerListFooter("§7Esperando siguiente mapa...");
         }
     }
 
-    /**
-     * Inicia la cuenta atrás previa al comienzo de la partida mostrando
-     * una BossBar que se va vaciando. Al llegar a cero llama a {@link #start()}.
-     * Si la partida ya ha comenzado, no hace nada.
-     *
-     * @param seconds duración de la cuenta atrás en segundos
-     */
     public void startCountdown(int seconds) {
         if (started) return;
 
@@ -271,17 +264,13 @@ public class GameMatch {
                 BarColor.BLUE,
                 BarStyle.SOLID
         );
-
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            countdownBar.addPlayer(p);
-        }
+        for (Player p : Bukkit.getOnlinePlayers()) countdownBar.addPlayer(p);
 
         countdownBar.setProgress(1.0);
         Bukkit.broadcastMessage("§aLa partida comenzará en §e" + countdown + " §asegundos.");
 
         countdownTask = Bukkit.getScheduler().runTaskTimer(Main.get(), () -> {
             countdown--;
-
             countdownBar.setTitle("La partida comienza en " + countdown + "s");
             countdownBar.setProgress(Math.max(0, (double) countdown / seconds));
 
@@ -295,35 +284,17 @@ public class GameMatch {
                 start();
             }
         }, 20L, 20L);
+
     }
 
-    /**
-     * Añade un jugador a la BossBar del temporizador de partida.
-     * No tiene efecto si la BossBar no está activa.
-     *
-     * @param p jugador a añadir
-     */
+
     public void addPlayerToMatchBar(Player p) {
         if (matchBar != null) matchBar.addPlayer(p);
     }
 
-    /**
-     * @return {@code true} si la partida está en curso
-     */
     public boolean isStarted() { return started; }
-
-    /**
-     * @param woolScoreboard scoreboard de lanas a asignar
-     */
     public void setWoolScoreboard(WoolScoreboard woolScoreboard) { this.woolScoreboard = woolScoreboard; }
-
-    /**
-     * @return scoreboard de lanas activo, o {@code null} si no se ha asignado
-     */
     public WoolScoreboard getWoolScoreboard() { return woolScoreboard; }
-
-    /**
-     * @return conjunto de IDs de equipos que han tocado alguna lana
-     */
     public Set<String> getEquiposTocaron() { return equiposTocaron; }
+    public KOTHHandler getKothHandler() { return kothHandler; }
 }
