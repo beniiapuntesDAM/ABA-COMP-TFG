@@ -6,13 +6,61 @@
   <component name="ChangeListManager">
     <list default="true" id="90b68277-9b4e-4a67-ad01-45b64035ff11" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.prettierrc" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.prettierrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.vscode/extensions.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.vscode/extensions.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.vscode/launch.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.vscode/mcp.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.vscode/mcp.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/.vscode/tasks.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/.vscode/tasks.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/angular.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/angular.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/app.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/app.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/app.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/app.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/btn-perfil/btn-perfil.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/podium/podium.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/podium/podium.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/podium/podium.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/podium/podium.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/podium/podium.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/podium/podium.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/top-card/top-card.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/top-card/top-card.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/top-card/top-card.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/top-card/top-card.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/top-card/top-card.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/top-card/top-card.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/models/player-stats.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/models/player-stats.model.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/login/login.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.spec.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/tournaments/tournaments.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/tournaments/tournaments.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/tournaments/tournaments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/tournaments/tournaments.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/SupabaseClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/SupabaseClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/main.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/src/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/tsconfig.app.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/tsconfig.app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aba-web/tsconfig.spec.json" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/tsconfig.spec.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,9 +100,9 @@
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/abejo/Documents/GitHub/ABA-COMP-TFG&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;reference.projectsettings.compiler.javacompiler&quot;
   }
 }</component>
