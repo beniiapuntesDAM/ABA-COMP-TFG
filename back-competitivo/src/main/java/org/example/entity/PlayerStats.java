@@ -50,4 +50,8 @@ public class PlayerStats {
     /** Daño recibido. */
     @JsonProperty("damage_taken")
     private int damageTaken;
+
+    /** ID del clan al que pertenece el jugador. */
+    @JsonProperty("id_clan")
+    private Integer idClan;
 }
