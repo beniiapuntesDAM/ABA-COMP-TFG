@@ -95,4 +95,8 @@ public class PlayerStatsService {
         return client.crearClan(nombreJugador);
     }
 
+    public String getNombreClanByJugador(String nombreJugador) {
+        return client.getNombreClanByJugador(nombreJugador);
+    }
+
 }

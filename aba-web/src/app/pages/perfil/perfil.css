@@ -331,4 +331,11 @@
   .accordion {
     max-width: 100%;
   }
+
+  .clan {
+  color: #e53935;
+  font-size: 0.9rem;
+  margin: 2px 0;
+  }
+
 }

@@ -8,7 +8,6 @@ import { PlayerStats } from '../models/player-stats.model';
 })
 export class PlayerStatsService {
 
-  
   private apiUrl = 'https://aba-comp-tfg.onrender.com/api/stats';
 
   constructor(private http: HttpClient) {}
@@ -59,5 +58,10 @@ export class PlayerStatsService {
       null,
       { params: { nombreClan } }
     );
+  }
+
+  // Obtener nombre del clan de un jugador
+  getClanByJugador(nombreJugador: string): Observable<string> {
+    return this.http.get(`${this.apiUrl}/clan-jugador/${nombreJugador}`, { responseType: 'text' });
   }
 }

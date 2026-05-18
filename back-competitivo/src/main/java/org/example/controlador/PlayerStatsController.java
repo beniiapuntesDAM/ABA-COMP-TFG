@@ -148,4 +148,13 @@ public class PlayerStatsController {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
     }
+
+    @GetMapping("/clan-jugador/{nombreJugador}")
+    public ResponseEntity<String> getClanByJugador(@PathVariable String nombreJugador) {
+        String nombreClan = playerStatsService.getNombreClanByJugador(nombreJugador);
+        if (nombreClan == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(nombreClan);
+    }
 }

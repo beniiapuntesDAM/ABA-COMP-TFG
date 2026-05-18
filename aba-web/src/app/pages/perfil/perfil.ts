@@ -17,6 +17,7 @@ export class Perfil implements OnInit {
   stats: PlayerStats | null = null;
   error = '';
   esPropietario = false;
+  nombreClan: string | null = null;
 
   nuevaContra = '';
   confirmarContra = '';
@@ -42,7 +43,11 @@ export class Perfil implements OnInit {
 
     if (usernameParam) {
       this.playerStatsService.getStatsByUsername(usernameParam).subscribe({
-        next: (data) => { this.stats = data; this.cdr.detectChanges(); },
+        next: (data) => {
+          this.stats = data;
+          this.cargarClan(data.username);
+          this.cdr.detectChanges();
+        },
         error: () => { this.error = 'Jugador no encontrado'; this.cdr.detectChanges(); }
       });
       return;
@@ -57,18 +62,24 @@ export class Perfil implements OnInit {
     this.esPropietario = true;
 
     this.playerStatsService.getStatsByUsername(username).subscribe({
-      next: (data) => { this.stats = data; this.cdr.detectChanges(); },
+      next: (data) => {
+        this.stats = data;
+        this.cargarClan(data.username);
+        this.cdr.detectChanges();
+      },
       error: () => { this.error = 'No se pudieron cargar las estadísticas'; this.cdr.detectChanges(); }
     });
   }
 
-  toggleClan(): void {
-    this.clanAbierto = !this.clanAbierto;
+  cargarClan(username: string): void {
+    this.playerStatsService.getClanByJugador(username).subscribe({
+      next: (clan) => { this.nombreClan = clan; this.cdr.detectChanges(); },
+      error: () => { this.nombreClan = null; }
+    });
   }
 
-  toggleContra(): void {
-    this.contraAbierto = !this.contraAbierto;
-  }
+  toggleClan(): void { this.clanAbierto = !this.clanAbierto; }
+  toggleContra(): void { this.contraAbierto = !this.contraAbierto; }
 
   logout(): void {
     this.deleteCookie('username');
@@ -115,10 +126,7 @@ export class Perfil implements OnInit {
         this.confirmarContra = '';
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.errorContra = 'Error al actualizar la contraseña.';
-        this.cdr.detectChanges();
-      }
+      error: () => { this.errorContra = 'Error al actualizar la contraseña.'; this.cdr.detectChanges(); }
     });
   }
 
@@ -136,23 +144,19 @@ export class Perfil implements OnInit {
       next: (resultado) => {
         if (resultado) {
           this.mensajeClan = `¡Te has unido al clan ${this.nuevoClan} correctamente!`;
+          this.nombreClan = this.nuevoClan.trim();
           this.nuevoClan = '';
         } else {
           this.errorClan = '❌ Clan no encontrado. Comprueba el nombre.';
         }
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.errorClan = '❌ Clan no encontrado. Comprueba el nombre.';
-        this.cdr.detectChanges();
-      }
+      error: () => { this.errorClan = '❌ Clan no encontrado. Comprueba el nombre.'; this.cdr.detectChanges(); }
     });
   }
 
   private getCookie(name: string): string | null {
-    const found = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${name}=`));
+    const found = document.cookie.split('; ').find(row => row.startsWith(`${name}=`));
     return found ? found.split('=')[1] : null;
   }
 

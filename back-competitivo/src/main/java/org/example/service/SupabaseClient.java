@@ -288,4 +288,40 @@ public class SupabaseClient {
         return response.getStatusCode().is2xxSuccessful();
     }
 
+    /**
+     * Devuelve el nombre del clan a partir del id_clan de un jugador.
+     *
+     * @param idClan ID del clan (foreign key en la tabla jugadores)
+     * @return nombre del clan, o {@code null} si no existe
+     */
+    public String getNombreClanById(Integer idClan) {
+        if (idClan == null) return null;
+
+        HttpEntity<String> entity = new HttpEntity<>(headers());
+        String queryUrl = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/clan?id=eq." + idClan + "&select=nombre_clan";
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                queryUrl,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+        );
+
+        List<Map<String, Object>> result = response.getBody();
+        if (result == null || result.isEmpty()) return null;
+        return (String) result.get(0).get("nombre_clan");
+    }
+
+    /**
+     * Devuelve el nombre del clan al que pertenece un jugador.
+     *
+     * @param nombreJugador nombre de usuario del jugador
+     * @return nombre del clan, o {@code null} si no tiene clan o no existe
+     */
+    public String getNombreClanByJugador(String nombreJugador) {
+        PlayerStats jugador = getByUsername(nombreJugador);
+        if (jugador == null) return null;
+        return getNombreClanById(jugador.getIdClan());
+    }
+
 }

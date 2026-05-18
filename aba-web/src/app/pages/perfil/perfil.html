@@ -2,12 +2,13 @@
   <ng-container *ngIf="stats">
 
     <div class="perfil-header">
-      <div class="avatar">{{ stats.username.charAt(0).toUpperCase() }}</div>
-      <div class="perfil-info">
-        <h1>{{ stats.username }}</h1>
-        <p class="since">Desde {{ stats.created_at | date:'MMM yyyy' }}</p>
-      </div>
-      <button class="logout-btn" *ngIf="esPropietario" (click)="logout()">Cerrar sesión</button>
+    <div class="avatar">{{ stats.username.charAt(0).toUpperCase() }}</div>
+    <div class="perfil-info">
+      <h1>{{ stats.username }}</h1>
+      <p class="clan" *ngIf="nombreClan">⚔️ {{ nombreClan }}</p>
+      <p class="since">Desde {{ stats.created_at | date:'MMM yyyy' }}</p>
+    </div>
+    <button class="logout-btn" *ngIf="esPropietario" (click)="logout()">Cerrar sesión</button>
     </div>
 
     <div class="stats-grid">
