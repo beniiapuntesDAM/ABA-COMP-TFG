@@ -1,4 +1,4 @@
 spring:
   supabase:
-    url: "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1"
-    key: "sb_publishable_3hsCpcNVmlgYWXINwHpYkQ_Ti-ZpanW"
+    url: ${SUPABASE_URL}
+    key: ${SUPABASE_KEY}

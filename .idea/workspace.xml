@@ -5,24 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90b68277-9b4e-4a67-ad01-45b64035ff11" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/back-competitivo/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/back-competitivo/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/components/search-bar/search-bar.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/home/home.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/profile/profile.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.css" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/rankings/rankings.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/SupabaseClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/SupabaseClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/back-competitivo/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
