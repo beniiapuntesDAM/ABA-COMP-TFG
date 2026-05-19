@@ -6,12 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="90b68277-9b4e-4a67-ad01-45b64035ff11" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/clan-perfil/clan-perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/clan-perfil/clan-perfil.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/clan-perfil/clan-perfil.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/clan-perfil/clan-perfil.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/pages/perfil/perfil.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/aba-web/src/app/services/player-stats.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/controlador/PlayerStatsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/back-competitivo/src/main/java/org/example/service/PlayerStatsService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
