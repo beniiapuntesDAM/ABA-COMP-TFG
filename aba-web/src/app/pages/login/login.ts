@@ -13,6 +13,11 @@ import { PlayerStatsService } from '../../services/player-stats.service';
 })
 export class Login implements OnInit {
 
+  /*
+  nombre de usuario
+  contraseña
+  error concreto(en caso de que ocurriera)
+  */
   usernameInput = '';
   passwordInput = '';
   error = '';
@@ -22,6 +27,8 @@ export class Login implements OnInit {
     private router: Router
   ) {}
 
+  /*Al cargar la página, comprobamos si ya hay una cookie con el username,
+    en caso de que haya redirige a perfil directamente*/
   ngOnInit(): void {
     const username = this.getCookie('username');
     if (username) {
@@ -29,6 +36,7 @@ export class Login implements OnInit {
     }
   }
 
+  // Comprueba la contraseña, con logs añadidos para comprobar que funciona
   login(): void {
   this.error = '';
   this.playerStatsService.comprobarContra(this.usernameInput, this.passwordInput).subscribe({
@@ -48,11 +56,12 @@ export class Login implements OnInit {
     }
   });
 }
-
+  // Guarda el username en una cookie para mantener la sesión iniciada
   private setCookie(name: string, value: string): void {
     document.cookie = `${name}=${value}; path=/`;
   }
 
+  //Comprueba la cookie del username
   private getCookie(name: string): string | null {
     const found = document.cookie
       .split('; ')

@@ -25,6 +25,8 @@ export class Home implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    // Tarjetas con ranking de los 5 mejores de cada ambito
     this.playerStatsService.getAllStats().subscribe({
       next: (data: PlayerStats[]) => {
         this.topKills    = [...data].sort((a, b) => b.kills - a.kills).slice(0, 5);

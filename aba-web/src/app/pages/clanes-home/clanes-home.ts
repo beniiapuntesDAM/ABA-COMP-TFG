@@ -29,6 +29,8 @@ export class ClanesHome implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    // Carga el nombre de todos los clanes y los filtra por victorias(5 mejores)
     this.playerStatsService.getAllClanes().subscribe({
       next: (nombres: string[]) => {
         const peticiones = nombres.map(nombre =>
@@ -47,6 +49,7 @@ export class ClanesHome implements OnInit {
     });
   }
 
+  // Metodo para buscar el clan pasado en la barra de busqueda
   search(): void {
     if (this.clanSearch.trim()) {
       this.router.navigate(['/clan', this.clanSearch.trim()]);
@@ -54,6 +57,7 @@ export class ClanesHome implements OnInit {
     }
   }
 
+  // Te redirige al clan que cliques en el ranking
   irAClan(nombre: string): void {
     this.router.navigate(['/clan', nombre]);
   }

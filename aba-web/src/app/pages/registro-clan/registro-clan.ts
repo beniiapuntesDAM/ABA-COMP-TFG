@@ -17,10 +17,12 @@ export class RegistroClan {
   nombreClan = '';
   error = '';
   mensaje = '';
+  // Variable para validar cuando se ha realizado la accion y cuando a fallado o esta en proceso
   cargando = false;
 
   constructor(private playerStatsService: PlayerStatsService) {}
 
+  // Metodo para crear un clan, comprobando que el nombre no este vacio
   crear(): void {
     this.error = '';
     this.mensaje = '';
@@ -32,6 +34,7 @@ export class RegistroClan {
 
     this.cargando = true;
 
+    // Llamada al servicio, al metodo para crear el clan pasandole el nombre pro parametro
     this.playerStatsService.crearClan(this.nombreClan.trim()).subscribe({
       next: (resultado) => {
         this.cargando = false;

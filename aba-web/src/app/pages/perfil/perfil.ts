@@ -16,6 +16,7 @@ export class Perfil implements OnInit {
 
   stats: PlayerStats | null = null;
   error = '';
+  // Variable que indica si se entro via login, o se busco el perfil 
   esPropietario = false;
   nombreClan: string | null = null;
 
@@ -38,9 +39,14 @@ export class Perfil implements OnInit {
     private route: ActivatedRoute
   ) {}
 
+  /*
+  Al cargar comprueba si hay un parametro de username en la URL,
+  si no comprueba la cookie y si fallan ambos redirige a el login   
+  */
   ngOnInit(): void {
     const usernameParam = this.route.snapshot.paramMap.get('username');
 
+    //comprueba la url buscando el username
     if (usernameParam) {
       this.playerStatsService.getStatsByUsername(usernameParam).subscribe({
         next: (data) => {
@@ -53,6 +59,7 @@ export class Perfil implements OnInit {
       return;
     }
 
+    // Comprueba la cookie del nombre, si no redirige a login
     const username = this.getCookie('username');
     if (!username) {
       this.router.navigate(['/login']);
@@ -61,6 +68,7 @@ export class Perfil implements OnInit {
 
     this.esPropietario = true;
 
+    //Carga las estadisticas del jugador, si encontro el nombre en alguno de los if anteriores
     this.playerStatsService.getStatsByUsername(username).subscribe({
       next: (data) => {
         this.stats = data;
@@ -71,6 +79,7 @@ export class Perfil implements OnInit {
     });
   }
 
+  // Usa el servicio para buscar el clan del jugador
   cargarClan(username: string): void {
     this.playerStatsService.getClanByJugador(username).subscribe({
       next: (clan) => { this.nombreClan = clan; this.cdr.detectChanges(); },
@@ -78,9 +87,11 @@ export class Perfil implements OnInit {
     });
   }
 
+  //Manejo de los desplegables
   toggleClan(): void { this.clanAbierto = !this.clanAbierto; }
   toggleContra(): void { this.contraAbierto = !this.contraAbierto; }
 
+  // Metodo de cerrar sesion, borrando la coockie y volviendo a login
   logout(): void {
     this.deleteCookie('username');
     this.router.navigate(['/login']);
@@ -105,6 +116,7 @@ export class Perfil implements OnInit {
     return total === 0 ? '0%' : ((this.stats.wins / total) * 100).toFixed(1) + '%';
   }
 
+  // Metodo para cambiar  la contraseña
   cambiarContra(): void {
     this.mensajeContra = '';
     this.errorContra = '';
@@ -118,6 +130,10 @@ export class Perfil implements OnInit {
       return;
     }
 
+    /*
+    Como una vez iniciada sesion, el nombre siempre va a guardarse en la coockie, recoge directamente 
+    este de ahi para pasarselo al servicio como parametro junto con la nueva contraseña
+    */
     const username = this.getCookie('username')!;
     this.playerStatsService.updateContra(username, this.nuevaContra).subscribe({
       next: () => {
@@ -130,6 +146,8 @@ export class Perfil implements OnInit {
     });
   }
 
+
+  // Metodo para cambiar el clan del jugador
   cambiarClan(): void {
     this.mensajeClan = '';
     this.errorClan = '';
@@ -139,6 +157,7 @@ export class Perfil implements OnInit {
       return;
     }
 
+    // Similar a como regoge el username el metodo de cambiar contra
     const username = this.getCookie('username')!;
     this.playerStatsService.updateClan(username, this.nuevoClan.trim()).subscribe({
       next: (resultado) => {
@@ -147,19 +166,21 @@ export class Perfil implements OnInit {
           this.nombreClan = this.nuevoClan.trim();
           this.nuevoClan = '';
         } else {
-          this.errorClan = '❌ Clan no encontrado. Comprueba el nombre.';
+          this.errorClan = 'Clan no encontrado. Comprueba el nombre.';
         }
         this.cdr.detectChanges();
       },
-      error: () => { this.errorClan = '❌ Clan no encontrado. Comprueba el nombre.'; this.cdr.detectChanges(); }
+      error: () => { this.errorClan = 'Clan no encontrado. Comprueba el nombre.'; this.cdr.detectChanges(); }
     });
   }
 
+  // Comprueba la cookie del nombre
   private getCookie(name: string): string | null {
     const found = document.cookie.split('; ').find(row => row.startsWith(`${name}=`));
     return found ? found.split('=')[1] : null;
   }
 
+  //Borrar la coockie(por ejemplo al cerrar sesión)
   private deleteCookie(name: string): void {
     document.cookie = `${name}=; path=/; max-age=0`;
   }

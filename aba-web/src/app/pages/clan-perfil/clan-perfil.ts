@@ -24,7 +24,9 @@ export class ClanPerfil implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+  
   ngOnInit(): void {
+
     this.clanName = this.route.snapshot.paramMap.get('clanName') ?? '';
 
     if (!this.clanName) {
@@ -32,11 +34,13 @@ export class ClanPerfil implements OnInit {
       return;
     }
 
+    // Llama al metodo del servicio que le pasa las stats del clan
     this.playerStatsService.getClanStats(this.clanName).subscribe({
       next: (data) => { this.stats = data; this.cdr.detectChanges(); },
       error: () => { this.error = 'No se pudieron cargar las estadísticas del clan'; this.cdr.detectChanges(); }
     });
 
+    // Llama al metodo del servicio que le pasa los jugadores del clan
     this.playerStatsService.getJugadoresDeClan(this.clanName).subscribe({
       next: (data) => { this.jugadores = data; this.cdr.detectChanges(); },
       error: () => { this.jugadores = []; }
