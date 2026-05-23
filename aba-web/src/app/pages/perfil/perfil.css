@@ -10,7 +10,6 @@
   font-family: Arial, sans-serif;
 }
 
-/* HEADER */
 
 .perfil-header {
   display: flex;
@@ -26,7 +25,6 @@
     inset 0 0 20px rgba(255,255,255,0.02);
 }
 
-/* AVATAR */
 
 .avatar {
   width: 82px;
@@ -43,7 +41,6 @@
   box-shadow: 0 0 20px rgba(229, 9, 20, 0.35);
 }
 
-/* INFO */
 
 .perfil-info h1 {
   margin: 0;
@@ -64,7 +61,6 @@
   letter-spacing: 0.5px;
 }
 
-/* BOTONES */
 
 .logout-btn,
 .home-btn {
@@ -95,7 +91,6 @@
   box-shadow: 0 0 20px rgba(229, 9, 20, 0.2);
 }
 
-/* GRID */
 
 .stats-grid {
   display: grid;
@@ -103,7 +98,6 @@
   gap: 1.3rem;
 }
 
-/* CARDS */
 
 .stat-card {
   background: linear-gradient(180deg, #171717, #111111);
@@ -150,7 +144,6 @@
   background: linear-gradient(180deg, rgba(229,9,20,0.12), #161616);
 }
 
-/* LABEL */
 
 .stat-label {
   color: #9c9c9c;
@@ -159,7 +152,6 @@
   letter-spacing: 1.2px;
 }
 
-/* VALUE */
 
 .stat-value {
   font-size: 2rem;
@@ -167,7 +159,6 @@
   color: white;
 }
 
-/* ERROR */
 
 .error {
   color: #ff4d4d;
@@ -175,7 +166,6 @@
   text-align: center;
 }
 
-/* FOOTER */
 
 .footer-actions {
   margin-top: 3rem;
@@ -185,7 +175,6 @@
   gap: 1.2rem;
 }
 
-/* INPUTS */
 
 .contra-input {
   width: 100%;
@@ -213,7 +202,6 @@
   box-shadow: 0 0 18px rgba(229, 9, 20, 0.18);
 }
 
-/* BOTÓN ACCIÓN */
 
 .contra-btn {
   padding: 1rem;
@@ -237,7 +225,6 @@
   opacity: 0.95;
 }
 
-/* MENSAJES */
 
 .modal-error {
   color: #ff5a5a;
@@ -253,7 +240,6 @@
   margin: 0;
 }
 
-/* ACORDEÓN */
 
 .accordion {
   width: 100%;
@@ -311,7 +297,6 @@
   padding: 0 1.8rem 1.8rem 1.8rem;
 }
 
-/* RESPONSIVE */
 
 @media (max-width: 700px) {
 
@@ -337,5 +322,13 @@
   font-size: 0.9rem;
   margin: 2px 0;
   }
+
+  .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 4rem;
+}
 
 }

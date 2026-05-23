@@ -50,6 +50,11 @@ export class Perfil implements OnInit {
     if (usernameParam) {
       this.playerStatsService.getStatsByUsername(usernameParam).subscribe({
         next: (data) => {
+          if (!data) {
+            this.error = 'Jugador no encontrado';
+            this.cdr.detectChanges();
+            return;
+          }
           this.stats = data;
           this.cargarClan(data.username);
           this.cdr.detectChanges();
@@ -71,6 +76,11 @@ export class Perfil implements OnInit {
     //Carga las estadisticas del jugador, si encontro el nombre en alguno de los if anteriores
     this.playerStatsService.getStatsByUsername(username).subscribe({
       next: (data) => {
+        if (!data) {
+          this.error = 'No se pudieron cargar las estadísticas';
+          this.cdr.detectChanges();
+          return;
+        }
         this.stats = data;
         this.cargarClan(data.username);
         this.cdr.detectChanges();

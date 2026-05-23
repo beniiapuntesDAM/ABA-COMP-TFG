@@ -1,4 +1,10 @@
 <div class="perfil-page">
+
+  <div class="error-container" *ngIf="error">
+    <p class="error">{{ error }}</p>
+    <button class="home-btn" routerLink="/">Volver al inicio</button>
+  </div>
+
   <ng-container *ngIf="stats">
 
     <div class="perfil-header">
@@ -65,13 +71,10 @@
 
     </div>
 
-    <p class="error" *ngIf="error">{{ error }}</p>
-
     <div class="footer-actions">
 
       <ng-container *ngIf="esPropietario">
 
-        <!-- Desplegable: Unirse a clan -->
         <div class="accordion">
           <button class="accordion-header" (click)="toggleClan()">
             <span>⚔️ Unirse a un clan</span>
@@ -90,7 +93,6 @@
           </div>
         </div>
 
-        <!-- Desplegable: Cambiar contraseña -->
         <div class="accordion">
           <button class="accordion-header" (click)="toggleContra()">
             <span>🔒 Cambiar contraseña</span>
