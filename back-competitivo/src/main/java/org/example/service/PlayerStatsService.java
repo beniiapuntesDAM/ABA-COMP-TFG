@@ -13,14 +13,14 @@ import java.util.List;
 public class PlayerStatsService {
 
     /** Cliente de Supabase usado para acceder a los datos. */
-    private final SupabaseClient client;
+    private final SupabaseClientInterface client;
 
     /**
      * Crea una nueva instancia del servicio con el cliente inyectado.
      *
      * @param client cliente de Supabase
      */
-    public PlayerStatsService(SupabaseClient client) {
+    public PlayerStatsService(SupabaseClientInterface client) {
         this.client = client;
     }
 
@@ -53,12 +53,26 @@ public class PlayerStatsService {
         return client.getByUsername(username);
     }
 
+    /**
+     * Actualiza la contraseña de un jugador.
+     *
+     * @param username nombre de usuario del jugador
+     * @param password nueva contraseña
+     * @return {@code true} si la contraseña se actualizó correctamente, {@code false} si hubo un error
+     */
     public boolean updateContra(String username, String password) { return client.updateContra(username, password); }
 
+    /**
+     * Comprueba si las credenciales de inicio de sesión son válidas.
+     *
+     * @param username nombre de usuario del jugador
+     * @param password contraseña del jugador
+     * @return {@code true} si las credenciales son válidas, {@code false} si no lo son
+     */
     public Boolean loginComprobarContrasenia(String username, String password){ return client.loginComprobarContrasenia(username, password); }
 
     /**
-     * Devuelve las estadísticas agregadas de todos los jugadores de un clan
+     * Devuelve las estadísticas sumadas de todos los jugadores de un clan
      *
      * @param nombreClan nombre del clan
      * @return {@link PlayerStats} con las estadísticas totales del clan
@@ -86,8 +100,8 @@ public class PlayerStatsService {
     /**
      * Saca todos los jugadores de un clan
      * 
-     * @param nombreClan
-     * @return
+     * @param nombreClan nombre del clan
+     * @return lista de jugadores del clan, o una lista vacía si el clan no tiene jugadores o no existe
      */
     public List<PlayerStats> getJugadoresDeClan(String nombreClan) {
         return client.getJugadoresByNombreClan(nombreClan);
@@ -97,8 +111,8 @@ public class PlayerStatsService {
     /**
      * Actualiza el clan de un jugador, asignandole el id del clan sacado con {@link #getIdClanByNombre(String)}, a partir del nombre del clan pasado por parametro
      * 
-     * @param nombreJugador
-     * @param nombreClan
+     * @param nombreJugador nombre del jugador
+     * @param nombreClan nombre del clan
      * @return true si se ha actualizado correctamente, false si ha habido un error
      */
     public Boolean actualizarClanJugador(String nombreJugador, String nombreClan) {

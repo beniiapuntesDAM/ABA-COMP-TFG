@@ -19,7 +19,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
  * Proporciona métodos para consultar jugadores por UUID o nombre de usuario.
  */
 @Component
-public class SupabaseClient {
+public class SupabaseClient implements SupabaseClientInterface {
 
     /** URL de la tabla jugadores en Supabase. */
     private final String url = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/jugadores";
