@@ -53,8 +53,9 @@ public class PlayerStatsController {
 
     /**
      * Devuelve true o false dependiendo si la contraseña coincide para ese username pasado tambien
-     * @param jugador
-     * @return
+     * 
+     * @param jugador jugador con el nombre de usuario y contraseña a comprobar
+     * @return {@code true} si la contraseña es correcta, {@code false} si no lo es o el usuario no existe
      */
     @PostMapping("/check")
     public ResponseEntity<Boolean> comprobarContra(@RequestBody PlayerStats jugador) {
@@ -68,6 +69,12 @@ public class PlayerStatsController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 
+    /**
+     * Actualiza la contraseña del jugador con el nombre de usuario indicado.
+     *
+     * @param jugador jugador con el nombre de usuario y nueva contraseña
+     * @return {@code true} si la contraseña se actualizó correctamente, {@code false} si hubo un error
+     */
     @PatchMapping("/updateContra")
     public ResponseEntity<Boolean> updateContra(@RequestBody PlayerStats jugador) {
         System.out.println("Username recibido: " + jugador.getUsername());  // ← log
@@ -114,6 +121,13 @@ public class PlayerStatsController {
         return ResponseEntity.ok(jugadores);
     }
 
+    /**
+     * Actualiza el clan de un jugador, asignandole el id del clan sacado con {@link #getIdClanByNombre(String)}, a partir del nombre del clan pasado por parametro
+     * 
+     * @param nombreJugador nombre del jugador al que se le va a actualizar el clan 
+     * @param nombreClan    nombre del clan al que se le va a asignar el jugador
+     * @return {@code true} si se ha actualizado correctamente, {@code false} si
+     */
     @PatchMapping("/updateClan")
     public ResponseEntity<Boolean> updateClan(
             @RequestParam String nombreJugador,
@@ -133,8 +147,9 @@ public class PlayerStatsController {
     }
 
     /**
-     *
-     * @return
+     * Devuelve una lista con el nombre de todos los clanes
+     * 
+     * @return lista de nombres de clanes
      */
     @GetMapping("/clanes")
     public ResponseEntity<List<String>> getAllClanes() {
@@ -146,9 +161,10 @@ public class PlayerStatsController {
     }
 
     /**
-     *
-     * @param nombreClan
-     * @return
+     * Crea un nuevo clan con el nombre indicado, eliminando tambien espacios, mayusculas y comprobando el nombre si existiera
+     * 
+     * @param nombreClan nombre del clan a crear
+     * @return {@code true} si el clan se creó correctamente, {@code false} si hubo un error al crearlo
      */
     @PostMapping("/crearClan")
     public ResponseEntity<Boolean> crearClan(@RequestParam String nombreClan) {
@@ -164,6 +180,12 @@ public class PlayerStatsController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
     }
 
+    /**
+     * Devuelve el nombre del clan al que pertenece un jugador
+     * 
+     * @param nombreJugador nombre del jugador
+     * @return nombre del clan, o {@code null} si el jugador no pertenece a ningún clan
+     */
     @GetMapping("/clan-jugador/{nombreJugador}")
     public ResponseEntity<String> getClanByJugador(@PathVariable String nombreJugador) {
         String nombreClan = playerStatsService.getNombreClanByJugador(nombreJugador);

@@ -21,8 +21,11 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 @Component
 public class SupabaseClient {
 
-    /** URL de la tabla player_stats en Supabase. */
+    /** URL de la tabla jugadores en Supabase. */
     private final String url = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/jugadores";
+
+    /** URL de la tabla clanes en Supabase. */
+    private final String urlClanes = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/clan";
 
     /** Clave de API pública de Supabase. */
     private final String key = "sb_publishable_3hsCpcNVmlgYWXINwHpYkQ_Ti-ZpanW";
@@ -48,7 +51,7 @@ public class SupabaseClient {
     /**
      * Devuelve la lista completa de jugadores almacenados en Supabase.
      *
-     * @return lista de {@link PlayerStats} con todos los jugadores
+     * @return lista de PlayerStats de todos los jugadores
      */
     public List<PlayerStats> getAllPlayers() {
         HttpEntity<String> entity = new HttpEntity<>(headers());
@@ -64,7 +67,7 @@ public class SupabaseClient {
     /**
      * Busca un jugador por su UUID.
      *
-     * @param uuid UUID del jugador
+     * @param uuid UUID del jugador a buscar
      * @return {@link PlayerStats} del jugador, o {@code null} si no existe
      */
     public PlayerStats getByUuid(String uuid) {
@@ -103,7 +106,7 @@ public class SupabaseClient {
      *
      * @param username nombre de cuenta del usuario
      * @param password contraseña del usuario
-     * @return
+     * @return {@code true} si el username y contraseña pasados coinciden con los de la bbdd, {@code false} en caso contrario
      */
     public boolean loginComprobarContrasenia(String username, String password) {
         HttpEntity<String> entity = new HttpEntity<>(headers());
@@ -140,7 +143,7 @@ public class SupabaseClient {
     }
 
     /**
-     * Obtiene el ID de un clan a partir de su nombre.
+     * Devuelve el id del clan, a partir de su nombre pasado por parametro
      *
      * @param nombreClan nombre del clan
      * @return ID del clan, o {@code null} si no existe
@@ -149,9 +152,7 @@ public class SupabaseClient {
         HttpEntity<String> entity = new HttpEntity<>(headers());
 
         String nombreNormalizado = nombreClan.trim().toLowerCase();
-        String queryUrl = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/clan?nombre_clan=ilike.*" + nombreNormalizado + "*&select=id";
-
-        System.out.println(">>> URL: " + queryUrl);
+        String queryUrl = urlClanes + "?nombre_clan=ilike.*" + nombreNormalizado + "*&select=id";
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 queryUrl,
@@ -161,13 +162,36 @@ public class SupabaseClient {
         );
 
         List<Map<String, Object>> result = response.getBody();
-        System.out.println(">>> body: " + result);
 
         return (result != null && !result.isEmpty()) ? ((Number) result.get(0).get("id")).intValue() : null;
     }
 
     /**
-     * Devuelve todos los jugadores cuyo id_clan coincida con el ID indicado.
+     * Devuelve el nombre del clan a partir del id_clan de un jugador.
+     *
+     * @param idClan ID del clan (foreign key en la tabla jugadores)
+     * @return nombre del clan, o {@code null} si no existe
+     */
+    public String getNombreClanById(Integer idClan) {
+        if (idClan == null) return null;
+
+        HttpEntity<String> entity = new HttpEntity<>(headers());
+        String queryUrl = urlClanes + "?id=eq." + idClan + "&select=nombre_clan";
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                queryUrl,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+        );
+
+        List<Map<String, Object>> result = response.getBody();
+        if (result == null || result.isEmpty()) return null;
+        return (String) result.get(0).get("nombre_clan");
+    }
+
+    /**
+     * Devuelve todos los jugadores cuyo id_clan coincida con el ID indicado(obtenido a partir del nombre del clan con el metodo {@link #getIdClanByNombre(String)})
      *
      * @param nombreClan nombre del clan
      * @return lista de {@link PlayerStats} miembros del clan
@@ -175,8 +199,6 @@ public class SupabaseClient {
     public List<PlayerStats> getJugadoresByNombreClan(String nombreClan) {
         HttpEntity<String> entity = new HttpEntity<>(headers());
         Integer idClan = getIdClanByNombre(nombreClan);
-
-        System.out.println(">>> idClan encontrado: " + idClan); // 👈
 
         if (idClan == null) return List.of();
 
@@ -186,15 +208,14 @@ public class SupabaseClient {
                 entity,
                 PlayerStats[].class
         );
-        PlayerStats[] result = response.getBody();
-
-        System.out.println(">>> jugadores encontrados: " + (result != null ? result.length : 0)); // 👈
+        PlayerStats[] result = response.getBody(); 
 
         return result != null ? Arrays.asList(result) : List.of();
     }
 
     /**
-     * Cambia el id_clan del jugador
+     * Cambia el id_clan del jugador por el id sacado con {@link #getIdClanByNombre(String)}, a partir del nombre del clan pasado por parametro
+     * 
      * @param nombreJugador
      * @param nombreClan
      */
@@ -214,10 +235,7 @@ public class SupabaseClient {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, httpHeaders);
 
-        String queryUrl = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/jugadores?username=eq." + nombreJugador.trim();
-
-        System.out.println(">>> URL PATCH: " + queryUrl);
-        System.out.println(">>> Body: " + body);
+        String queryUrl = url + "?username=eq." + nombreJugador.trim();
 
         ResponseEntity<String> response = restTemplate.exchange(
                 queryUrl,
@@ -226,20 +244,18 @@ public class SupabaseClient {
                 String.class
         );
 
-        System.out.println(">>> Status: " + response.getStatusCode());
         return response.getStatusCode().is2xxSuccessful();
     }
 
     /**
-     *
-     * @return
+     * Devuelve una lista con el nombre de todos los clanes 
+     * 
+     * @return lista de nombres de clanes
      */
     public List<String> getAllClanes() {
         HttpEntity<String> entity = new HttpEntity<>(headers());
 
-        String queryUrl = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/clan?select=nombre_clan";
-
-        System.out.println(">>> URL: " + queryUrl);
+        String queryUrl = urlClanes + "?select=nombre_clan";
 
         ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 queryUrl,
@@ -249,7 +265,6 @@ public class SupabaseClient {
         );
 
         List<Map<String, Object>> result = response.getBody();
-        System.out.println(">>> body: " + result);
 
         if (result == null || result.isEmpty()) return List.of();
 
@@ -259,9 +274,10 @@ public class SupabaseClient {
     }
 
     /**
-     *
-     * @param nombreClan
-     * @return
+     * Crea un nuevo clan con el nombre indicado, eliminando tambien espacios, mayusculas y comprobando el nombre si existiera
+     * 
+     * @param nombreClan nombre del clan a crear
+     * @return {@code true} si el clan se creó correctamente, {@code false} si hubo un error al crearlo
      */
     public boolean crearClan(String nombreClan) {
         HttpHeaders httpHeaders = headers();
@@ -272,45 +288,17 @@ public class SupabaseClient {
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, httpHeaders);
 
-        String queryUrl = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/clan";
-
-        System.out.println(">>> URL POST: " + queryUrl);
-        System.out.println(">>> Body: " + body);
-
         ResponseEntity<String> response = restTemplate.exchange(
-                queryUrl,
+                urlClanes,
                 HttpMethod.POST,
                 entity,
                 String.class
         );
 
-        System.out.println(">>> Status: " + response.getStatusCode());
         return response.getStatusCode().is2xxSuccessful();
     }
 
-    /**
-     * Devuelve el nombre del clan a partir del id_clan de un jugador.
-     *
-     * @param idClan ID del clan (foreign key en la tabla jugadores)
-     * @return nombre del clan, o {@code null} si no existe
-     */
-    public String getNombreClanById(Integer idClan) {
-        if (idClan == null) return null;
-
-        HttpEntity<String> entity = new HttpEntity<>(headers());
-        String queryUrl = "https://fiyinrjnpkwmllzkpnsj.supabase.co/rest/v1/clan?id=eq." + idClan + "&select=nombre_clan";
-
-        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                queryUrl,
-                HttpMethod.GET,
-                entity,
-                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
-        );
-
-        List<Map<String, Object>> result = response.getBody();
-        if (result == null || result.isEmpty()) return null;
-        return (String) result.get(0).get("nombre_clan");
-    }
+    
 
     /**
      * Devuelve el nombre del clan al que pertenece un jugador.
